@@ -221,10 +221,12 @@ class GameLexI18n {
       });
     }
 
-    // Update current name on lang change
+    // Update current name AND flag on lang change
     window.addEventListener('gl:langchange', ({ detail }) => {
       const nameEl = el.querySelector('.gl-current-name');
+      const flagEl = el.querySelector('.gl-current-flag');
       if (nameEl) nameEl.textContent = GL_LANGS[detail.lang]?.name || '';
+      if (flagEl) flagEl.textContent = GL_LANGS[detail.lang]?.flag || '';
     });
   }
 
