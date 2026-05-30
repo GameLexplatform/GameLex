@@ -287,10 +287,15 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
 
 .upload-zone {
   border:2px dashed rgba(0,230,118,0.25);
-  border-radius:12px; padding:40px;
-  text-align:center; cursor:pointer;
-  transition:all 0.25s; margin-bottom:20px;
+  border-radius:12px;
+  padding:40px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.25s;
+  margin-bottom:20px;
   background:rgba(0,230,118,0.02);
+  position:relative;
+  overflow:hidden;
 }
 .upload-zone:hover { border-color:var(--green); background:rgba(0,230,118,0.05); }
 .upload-zone.dragging { border-color:var(--green); background:rgba(0,230,118,0.08); }
@@ -631,18 +636,20 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
       </div>
     </div>
 
-    <label for="file-input" class="upload-zone" id="upload-zone"
+    <div class="upload-zone" id="upload-zone"
       ondragover="handleDragOver(event)"
       ondragleave="handleDragLeave(event)"
-      ondrop="handleDrop(event)"
-      style="cursor:pointer;display:block;">
-      <input type="file" id="file-input" multiple accept=".po,.xliff,.json,.csv,.png,.mp3,.zip,.txt" style="display:none;position:absolute;" onchange="handleFiles(this.files)">
-      <div id="upload-zone-content">
+      ondrop="handleDrop(event)">
+      <input type="file" id="file-input" multiple
+        accept="image/*,video/*,audio/*,.po,.xliff,.json,.csv,.mp3,.zip,.txt,.pdf"
+        style="opacity:0;position:absolute;width:100%;height:100%;top:0;left:0;cursor:pointer;z-index:2;"
+        onchange="handleFiles(this.files)">
+      <div id="upload-zone-content" style="position:relative;z-index:1;pointer-events:none;">
         <div style="font-size:2rem;margin-bottom:8px;">📁</div>
         <div style="font-size:0.9rem;margin-bottom:4px;">اسحب ملفاتك هنا أو اضغط للاختيار</div>
         <div style="font-size:0.75rem;color:var(--text-dim);">.PO .XLIFF .JSON .CSV .PNG .MP3 .ZIP</div>
       </div>
-    </label>
+    </div>
 
     <!-- File list -->
     <div id="file-list" style="display:none;margin-bottom:16px;">

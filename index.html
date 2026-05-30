@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GameLex — منصة توطين الألعاب</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="i18n.js"></script>
 <style>
   :root {
@@ -1325,16 +1325,13 @@
   </div>
 
   <div class="upload-grid reveal">
-    <div class="upload-zone" onclick="simulateUpload(this)">
+    <div class="upload-zone" onclick="goToUpload()"
+      ondragover="event.preventDefault();this.style.borderColor='var(--green)'"
+      ondragleave="this.style.borderColor=''"
+      ondrop="event.preventDefault();goToUpload()">
       <span class="upload-icon">📦</span>
-      <h3>
-        <span class="ar-text">اسحب الملفات هنا</span>
-        <span class="en-text">Drop files here</span>
-      </h3>
-      <p>
-        <span class="ar-text">أو اضغط للاختيار</span>
-        <span class="en-text">or click to browse</span>
-      </p>
+      <h3 data-i18n="drop_files">اسحب الملفات هنا</h3>
+      <p data-i18n="or_click">أو اضغط للاختيار</p>
       <div class="upload-types">
         <span class="type-tag">.PO</span>
         <span class="type-tag">.XLIFF</span>
@@ -1668,15 +1665,11 @@
   <div class="modal">
     <button class="modal-close" onclick="closeAuth()">✕</button>
     <div class="modal-logo">GameLex</div>
-    <div class="modal-sub" id="modal-sub-text">سجّل دخولك لإدارة حزم التوطين</div>
+    <div class="modal-sub" id="modal-sub-text" data-i18n="modal_sub">سجّل دخولك لإدارة حزم التوطين</div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">
-        <span class="ar-inline">دخول</span><span class="en-inline">Login</span>
-      </button>
-      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">
-        <span class="ar-inline">حساب جديد</span><span class="en-inline">Sign Up</span>
-      </button>
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')" data-i18n="tab_login">دخول</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')" data-i18n="tab_signup">حساب جديد</button>
     </div>
 
     <div id="auth-error" class="auth-error"></div>
@@ -1691,15 +1684,13 @@
         <label class="form-label">PASSWORD</label>
         <input class="form-input" type="password" id="login-password" placeholder="••••••••">
       </div>
-      <button class="btn-auth" id="btn-login" onclick="doLogin()">
-        <span class="ar-inline">🔐 دخول</span><span class="en-inline">🔐 Login</span>
-      </button>
+      <button class="btn-auth" id="btn-login" onclick="doLogin()" data-i18n="nav_login">🔐 دخول</button>
     </div>
 
     <div id="signup-form" style="display:none;">
       <div class="form-group">
         <label class="form-label">STUDIO NAME</label>
-        <input class="form-input" type="text" id="signup-name" placeholder="اسم الاستوديو">
+        <input class="form-input" type="text" id="signup-name" data-i18n-placeholder="studio_name" placeholder="اسم الاستوديو">
       </div>
       <div class="form-group">
         <label class="form-label">EMAIL</label>
@@ -1707,11 +1698,9 @@
       </div>
       <div class="form-group">
         <label class="form-label">PASSWORD</label>
-        <input class="form-input" type="password" id="signup-password" placeholder="8+ أحرف">
+        <input class="form-input" type="password" id="signup-password" placeholder="6+ chars">
       </div>
-      <button class="btn-auth" id="btn-signup" onclick="doSignup()">
-        <span class="ar-inline">🚀 إنشاء حساب</span><span class="en-inline">🚀 Create Account</span>
-      </button>
+      <button class="btn-auth" id="btn-signup" onclick="doSignup()" data-i18n="signup_btn">🚀 إنشاء حساب</button>
     </div>
   </div>
 </div>
@@ -1800,7 +1789,7 @@ async function doLogin() {
   clearAuthMessages();
   const { error } = await sb.auth.signInWithPassword({ email, password });
   btn.disabled = false;
-  btn.innerHTML = '<span class="ar-inline">🔐 دخول</span><span class="en-inline">🔐 Login</span>';
+  btn.textContent = i18n.t('nav_login');
   if (error) showAuthError(error.message);
 }
 
@@ -1816,7 +1805,7 @@ async function doSignup() {
   clearAuthMessages();
   const { error } = await sb.auth.signUp({ email, password, options: { data: { studio_name: name } } });
   btn.disabled = false;
-  btn.innerHTML = '<span class="ar-inline">🚀 إنشاء حساب</span><span class="en-inline">🚀 Create Account</span>';
+  btn.textContent = i18n.t('signup_btn');
   if (error) showAuthError(error.message);
   else showAuthSuccess('✓ تم إنشاء الحساب! تحقق من بريدك الإلكتروني.');
 }
@@ -1960,8 +1949,8 @@ function selectOption(el) {
 }
 
 // Upload simulation
-function simulateUpload(el) {
-  el.innerHTML = `<span class="upload-icon">📁</span><h3 data-i18n="drop_files">اسحب الملفات هنا</h3><p style="color:var(--text-dim);font-size:0.82rem;" data-i18n="or_click">أو اضغط للاختيار</p><div class="upload-types"><span class="type-tag">.PO</span><span class="type-tag">.XLIFF</span><span class="type-tag">.JSON</span><span class="type-tag">.CSV</span><span class="type-tag">.PNG</span><span class="type-tag">.MP3</span></div>`;
+function goToUpload() {
+  window.location.href = 'client.html';
 }
 
 // Launch — save to Supabase

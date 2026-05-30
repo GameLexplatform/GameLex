@@ -70,6 +70,13 @@ const GL_T = {
   start_free:     { ar:'ابدأ مجاناً', en:'Start Free', es:'Empezar gratis', pt:'Começar grátis', fr:'Commencer gratuitement', it:'Inizia gratis', de:'Kostenlos starten', ru:'Начать бесплатно', ko:'무료로 시작', zh:'免费开始', ja:'無料で始める' },
   contact_us:     { ar:'تواصل معنا', en:'Contact Us', es:'Contactar', pt:'Contatar', fr:'Nous contacter', it:'Contattaci', de:'Kontakt', ru:'Связаться', ko:'문의하기', zh:'联系我们', ja:'お問い合わせ' },
 
+  // ── MODAL AUTH ──
+  modal_sub:    { ar:'سجّل دخولك لإدارة حزم التوطين', en:'Sign in to manage your localization packages', es:'Inicia sesión para gestionar tus paquetes', pt:'Entre para gerenciar seus pacotes', fr:'Connectez-vous pour gérer vos packages', it:'Accedi per gestire i tuoi pacchetti', de:'Anmelden zur Verwaltung Ihrer Pakete', ru:'Войдите для управления пакетами', ko:'패키지 관리를 위해 로그인하세요', zh:'登录以管理您的本地化包', ja:'パッケージを管理するためにサインインしてください' },
+  tab_login:    { ar:'دخول',         en:'Login',        es:'Entrar',      pt:'Entrar',      fr:'Connexion',   it:'Accedi',      de:'Anmelden',    ru:'Войти',       ko:'로그인',      zh:'登录',    ja:'ログイン' },
+  tab_signup:   { ar:'حساب جديد',    en:'Sign Up',      es:'Registrarse', pt:'Cadastrar',   fr:'S\'inscrire',  it:'Registrati',  de:'Registrieren',ru:'Регистрация', ko:'회원가입',    zh:'注册',    ja:'登録' },
+  signup_btn:   { ar:'🚀 إنشاء حساب',en:'🚀 Create Account', es:'🚀 Crear cuenta', pt:'🚀 Criar conta', fr:'🚀 Créer un compte', it:'🚀 Crea account', de:'🚀 Konto erstellen', ru:'🚀 Создать аккаунт', ko:'🚀 계정 만들기', zh:'🚀 创建账户', ja:'🚀 アカウント作成' },
+  studio_name:  { ar:'اسم الاستوديو', en:'Studio name', es:'Nombre del estudio', pt:'Nome do estúdio', fr:'Nom du studio', it:'Nome dello studio', de:'Studioname', ru:'Название студии', ko:'스튜디오 이름', zh:'工作室名称', ja:'スタジオ名' },
+
   // ── CTA ──
   cta_title1:     { ar:'جاهز تطلق لعبتك', en:'Ready to launch your game', es:'¿Listo para lanzar tu juego', pt:'Pronto para lançar seu jogo', fr:'Prêt à lancer votre jeu', it:'Pronto a lanciare il tuo gioco', de:'Bereit, dein Spiel zu launchen', ru:'Готовы запустить игру', ko:'게임을 출시할 준비가 되셨나요', zh:'准备好将游戏推向', ja:'ゲームをローンチする準備ができましたか' },
   cta_title2:     { ar:'للعالم العربي؟', en:'to the Arab world?', es:'al mundo árabe?', pt:'para o mundo árabe?', fr:'dans le monde arabe?', it:'nel mondo arabo?', de:'in die arabische Welt?', ru:'в арабский мир?', ko:'아랍 세계로?', zh:'阿拉伯世界？', ja:'アラブ世界へ？' },
@@ -175,7 +182,7 @@ class GameLexI18n {
             font-size:0.82rem;cursor:pointer;font-family:inherit;
             transition:all 0.2s;white-space:nowrap;
           ">
-            <span>${GL_LANGS[this.current].flag}</span>
+            <span class="gl-current-flag">${GL_LANGS[this.current].flag}</span>
             <span class="gl-current-name">${GL_LANGS[this.current].name}</span>
             <span style="color:rgba(0,230,118,0.6);font-size:0.7rem;">▾</span>
           </button>
