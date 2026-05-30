@@ -570,8 +570,8 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
           <div class="card-header"><div class="card-title">⚡ إجراءات سريعة</div></div>
           <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
             <button class="btn-primary" style="justify-content:center;" onclick="openUpload()">📦 رفع حزمة جديدة</button>
-            <button class="btn-outline" onclick="toast('قريباً — مصطلحات مخصصة')">📖 إدارة المصطلحات</button>
-            <button class="btn-outline" onclick="toast('قريباً — تقارير مفصلة')">📊 تقرير الجودة</button>
+            <button class="btn-outline" onclick="openGlossary()">📖 إدارة المصطلحات</button>
+            <button class="btn-outline" onclick="openReports()">📊 تقرير الجودة</button>
           </div>
         </div>
 
@@ -631,10 +631,34 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
       </div>
     </div>
 
-    <div class="upload-zone" onclick="toast('رفع الملفات قريباً')">
-      <div style="font-size:2rem;margin-bottom:8px;">📁</div>
-      <div style="font-size:0.9rem;margin-bottom:4px;">اسحب ملفاتك هنا</div>
-      <div style="font-size:0.75rem;color:var(--text-dim);">.PO .XLIFF .JSON .CSV .PNG .MP3</div>
+    <div class="upload-zone" id="upload-zone"
+      onclick="document.getElementById('file-input').click()"
+      ondragover="handleDragOver(event)"
+      ondragleave="handleDragLeave(event)"
+      ondrop="handleDrop(event)">
+      <input type="file" id="file-input" multiple accept=".po,.xliff,.json,.csv,.png,.mp3,.zip,.txt" style="display:none" onchange="handleFiles(this.files)">
+      <div id="upload-zone-content">
+        <div style="font-size:2rem;margin-bottom:8px;">📁</div>
+        <div style="font-size:0.9rem;margin-bottom:4px;">اسحب ملفاتك هنا أو اضغط للاختيار</div>
+        <div style="font-size:0.75rem;color:var(--text-dim);">.PO .XLIFF .JSON .CSV .PNG .MP3 .ZIP</div>
+      </div>
+    </div>
+
+    <!-- File list -->
+    <div id="file-list" style="display:none;margin-bottom:16px;">
+      <div style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:8px;letter-spacing:1px;">FILES SELECTED</div>
+      <div id="file-items" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <!-- Upload progress -->
+    <div id="upload-progress" style="display:none;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:6px;">
+        <span style="color:var(--text-dim);">جاري الرفع...</span>
+        <span id="upload-pct" style="font-family:'Space Mono',monospace;color:var(--cyan);">0%</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+        <div id="upload-bar" style="height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;width:0%;transition:width 0.3s;"></div>
+      </div>
     </div>
 
     <div id="launch-msg" style="display:none;margin-bottom:16px;padding:12px 14px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);border-radius:8px;font-size:0.82rem;color:var(--green);font-family:'Space Mono',monospace;"></div>
@@ -694,6 +718,67 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
         <button class="btn-outline" style="flex:1;" onclick="toast('تحميل التقرير قريباً')">📄 تحميل التقرير</button>
         <button class="btn-outline" onclick="closeDetail()">إغلاق</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── GLOSSARY MODAL ─── -->
+<div class="modal-overlay" id="glossaryModal">
+  <div class="modal" style="width:620px;">
+    <div class="modal-title">📖 المصطلحات المخصصة</div>
+
+    <!-- Add term form -->
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:20px;align-items:end;">
+      <div>
+        <div style="font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:5px;">SOURCE TERM</div>
+        <input class="form-input" id="g-source" placeholder="المصطلح الأصلي" style="direction:auto;">
+      </div>
+      <div>
+        <div style="font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:5px;">TRANSLATION</div>
+        <input class="form-input" id="g-trans" placeholder="الترجمة">
+      </div>
+      <button class="btn-primary" onclick="addTerm()" style="padding:11px 16px;white-space:nowrap;">+ إضافة</button>
+    </div>
+    <div>
+      <div style="font-size:0.7rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:5px;">CONTEXT (اختياري)</div>
+      <input class="form-input" id="g-context" placeholder="سياق الاستخدام مثلاً: اسم سلاح، قدرة خاصة..." style="margin-bottom:16px;direction:auto;">
+    </div>
+
+    <!-- Search -->
+    <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:8px 14px;margin-bottom:14px;">
+      <span style="color:var(--text-dim);">🔍</span>
+      <input type="text" id="g-search" placeholder="ابحث في المصطلحات..." oninput="filterGlossary()"
+        style="background:none;border:none;color:var(--text);font-size:0.85rem;font-family:'Tajawal',sans-serif;outline:none;flex:1;">
+    </div>
+
+    <!-- Terms list -->
+    <div id="glossary-list" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+      <div style="text-align:center;padding:30px;color:var(--text-dim);font-size:0.82rem;">⟳ جاري التحميل...</div>
+    </div>
+
+    <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;">
+      <span id="glossary-count" style="font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;"></span>
+      <button class="btn-outline" onclick="closeGlossary()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── REPORTS MODAL ─── -->
+<div class="modal-overlay" id="reportsModal">
+  <div class="modal" style="width:600px;">
+    <div class="modal-title">📊 تقارير الجودة</div>
+
+    <!-- Stats overview -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;" id="report-stats"></div>
+
+    <!-- Per-package breakdown -->
+    <div style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:10px;">PACKAGES BREAKDOWN</div>
+    <div id="report-packages" style="display:flex;flex-direction:column;gap:10px;max-height:320px;overflow-y:auto;"></div>
+
+    <!-- Export -->
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button class="btn-primary" style="flex:1;justify-content:center;" onclick="exportReport()">📥 تصدير CSV</button>
+      <button class="btn-outline" onclick="closeReports()">إغلاق</button>
     </div>
   </div>
 </div>
@@ -909,6 +994,14 @@ function openUpload() {
 }
 function closeUpload() {
   document.getElementById('uploadModal').classList.remove('open');
+  selectedFiles = [];
+  document.getElementById('file-list').style.display = 'none';
+  document.getElementById('upload-progress').style.display = 'none';
+  document.getElementById('launch-msg').style.display = 'none';
+  document.getElementById('upload-zone-content').innerHTML = `
+    <div style="font-size:2rem;margin-bottom:8px;">📁</div>
+    <div style="font-size:0.9rem;margin-bottom:4px;">اسحب ملفاتك هنا أو اضغط للاختيار</div>
+    <div style="font-size:0.75rem;color:var(--text-dim);">.PO .XLIFF .JSON .CSV .PNG .MP3 .ZIP</div>`;
 }
 
 function selectOpt(el, type) {
@@ -919,15 +1012,16 @@ function selectOpt(el, type) {
 
 async function launchPackage() {
   const gameName = document.getElementById('m-game').value.trim();
-  const assets   = parseInt(document.getElementById('m-assets').value) || 0;
+  const assets   = parseInt(document.getElementById('m-assets').value) || selectedFiles.length || 0;
   const msgEl    = document.getElementById('launch-msg');
 
   if (!gameName) { toast('⚠️ أدخل اسم اللعبة'); return; }
 
   msgEl.style.display = 'block';
-  msgEl.textContent = '⟳ جاري الحفظ في Supabase...';
   msgEl.style.color = 'var(--cyan)';
+  msgEl.textContent = '⟳ جاري حفظ الحزمة...';
 
+  // 1. Save to DB
   const { data, error } = await sb.from('packages').insert([{
     user_id: user.id,
     game_name: gameName,
@@ -937,19 +1031,31 @@ async function launchPackage() {
   }]).select();
 
   if (error) {
-    // Demo mode
-    packages.unshift({ id:'local-'+Date.now(), game_name:gameName, assets_count:assets, status:'queue', type:selectedType, created_at:new Date().toISOString() });
-    msgEl.textContent = '✓ تم الإطلاق! (demo — أنشئ جدول packages في Supabase)';
-  } else {
-    packages.unshift(data[0]);
-    msgEl.textContent = '✓ تم حفظ الحزمة في Supabase بنجاح!';
-    msgEl.style.color = 'var(--green)';
+    msgEl.style.color = 'var(--red)';
+    msgEl.textContent = '✕ خطأ في الحفظ — ' + error.message;
+    return;
   }
 
+  const pkg = data[0];
+
+  // 2. Upload files to Storage
+  if (selectedFiles.length > 0) {
+    msgEl.textContent = '⟳ جاري رفع الملفات...';
+    await uploadFilesToStorage(pkg.id);
+  }
+
+  // 3. Done
+  msgEl.style.color = 'var(--green)';
+  msgEl.textContent = `✓ تم! ${selectedFiles.length > 0 ? 'الحزمة والملفات مرفوعة' : 'الحزمة محفوظة'} بنجاح 🎉`;
+
+  packages.unshift(pkg);
+  selectedFiles = [];
+  document.getElementById('file-list').style.display = 'none';
+  document.getElementById('upload-progress').style.display = 'none';
   updateStats();
   renderPackages();
   renderActivity();
-  setTimeout(closeUpload, 2000);
+  setTimeout(closeUpload, 2200);
 }
 
 // ─── DETAIL MODAL ───
@@ -989,7 +1095,254 @@ function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
 }
 
-// ─── HELPERS ───
+// ─── FILE UPLOAD ───
+let selectedFiles = [];
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.add('dragging');
+}
+function handleDragLeave(e) {
+  document.getElementById('upload-zone').classList.remove('dragging');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragging');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files) {
+  selectedFiles = Array.from(files);
+  if (!selectedFiles.length) return;
+
+  const listEl = document.getElementById('file-list');
+  const itemsEl = document.getElementById('file-items');
+  listEl.style.display = 'block';
+
+  itemsEl.innerHTML = selectedFiles.map((f, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:8px;padding:9px 14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1rem;">${getFileIcon(f.name)}</span>
+        <div>
+          <div style="font-size:0.82rem;font-weight:600;">${f.name}</div>
+          <div style="font-size:0.68rem;color:var(--text-dim);">${formatSize(f.size)}</div>
+        </div>
+      </div>
+      <button onclick="removeFile(${i})" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;padding:2px 6px;">✕</button>
+    </div>`).join('');
+
+  // Update zone
+  document.getElementById('upload-zone-content').innerHTML = `
+    <div style="font-size:1.5rem;margin-bottom:6px;">✅</div>
+    <div style="font-size:0.88rem;color:var(--green);">${selectedFiles.length} ملف محدد</div>
+    <div style="font-size:0.72rem;color:var(--text-dim);margin-top:4px;">اضغط لإضافة المزيد</div>`;
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i, 1);
+  if (selectedFiles.length === 0) {
+    document.getElementById('file-list').style.display = 'none';
+    document.getElementById('upload-zone-content').innerHTML = `
+      <div style="font-size:2rem;margin-bottom:8px;">📁</div>
+      <div style="font-size:0.9rem;margin-bottom:4px;">اسحب ملفاتك هنا أو اضغط للاختيار</div>
+      <div style="font-size:0.75rem;color:var(--text-dim);">.PO .XLIFF .JSON .CSV .PNG .MP3 .ZIP</div>`;
+  } else {
+    handleFiles(selectedFiles);
+  }
+}
+
+function getFileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  const map = { po:'📝', xliff:'📝', json:'📋', csv:'📊', png:'🖼️', mp3:'🎵', zip:'📦', txt:'📄' };
+  return map[ext] || '📄';
+}
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+async function uploadFilesToStorage(pkgId) {
+  if (!selectedFiles.length) return [];
+  const uploaded = [];
+  const progressEl = document.getElementById('upload-progress');
+  const barEl = document.getElementById('upload-bar');
+  const pctEl = document.getElementById('upload-pct');
+  progressEl.style.display = 'block';
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    const file = selectedFiles[i];
+    const path = `${user.id}/${pkgId}/${file.name}`;
+    const pct = Math.round(((i) / selectedFiles.length) * 100);
+    barEl.style.width = pct + '%';
+    pctEl.textContent = pct + '%';
+
+    const { data, error } = await sb.storage
+      .from('packages')
+      .upload(path, file, { upsert: true });
+
+    if (!error) uploaded.push(path);
+  }
+
+  barEl.style.width = '100%';
+  pctEl.textContent = '100%';
+  return uploaded;
+}
+
+// ─── LAUNCH (updated with real upload) ───
+
+// ─── GLOSSARY ───
+let glossaryTerms = [];
+
+async function openGlossary() {
+  document.getElementById('glossaryModal').classList.add('open');
+  await loadGlossary();
+}
+function closeGlossary() {
+  document.getElementById('glossaryModal').classList.remove('open');
+}
+
+async function loadGlossary() {
+  const { data, error } = await sb
+    .from('glossary').select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  glossaryTerms = data || [];
+  renderGlossary(glossaryTerms);
+}
+
+function renderGlossary(terms) {
+  const el = document.getElementById('glossary-list');
+  document.getElementById('glossary-count').textContent = terms.length + ' مصطلح';
+  if (!terms.length) {
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-dim);font-size:0.85rem;"><div style="font-size:2rem;margin-bottom:8px;">📖</div><div>لا توجد مصطلحات — أضف أول مصطلح</div></div>`;
+    return;
+  }
+  el.innerHTML = terms.map(t => `
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;
+      background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:12px 14px;">
+      <div>
+        <div style="font-size:0.85rem;font-weight:600;">${t.source_term}</div>
+        ${t.context ? `<div style="font-size:0.7rem;color:var(--text-dim);">${t.context}</div>` : ''}
+      </div>
+      <div style="color:var(--green);font-size:0.85rem;font-weight:600;">${t.translated_term}</div>
+      <button onclick="deleteTerm('${t.id}')"
+        style="background:none;border:1px solid var(--border2);color:var(--text-dim);
+        padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;transition:all 0.2s;"
+        onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'"
+        onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-dim)'">حذف</button>
+    </div>`).join('');
+}
+
+function filterGlossary() {
+  const q = document.getElementById('g-search').value.toLowerCase();
+  renderGlossary(glossaryTerms.filter(t =>
+    t.source_term.toLowerCase().includes(q) ||
+    t.translated_term.toLowerCase().includes(q)
+  ));
+}
+
+async function addTerm() {
+  const source = document.getElementById('g-source').value.trim();
+  const trans  = document.getElementById('g-trans').value.trim();
+  const ctx    = document.getElementById('g-context').value.trim();
+  if (!source || !trans) { toast('⚠️ أدخل المصطلح وترجمته'); return; }
+  const { data, error } = await sb.from('glossary').insert([{
+    user_id: user.id, source_term: source,
+    translated_term: trans, context: ctx || null, language: 'ar'
+  }]).select();
+  if (error) { toast('✕ خطأ: ' + error.message); return; }
+  glossaryTerms.unshift(data[0]);
+  renderGlossary(glossaryTerms);
+  document.getElementById('g-source').value = '';
+  document.getElementById('g-trans').value = '';
+  document.getElementById('g-context').value = '';
+  toast('✓ تمت إضافة المصطلح');
+}
+
+async function deleteTerm(id) {
+  await sb.from('glossary').delete().eq('id', id);
+  glossaryTerms = glossaryTerms.filter(t => t.id !== id);
+  renderGlossary(glossaryTerms);
+  toast('🗑 تم الحذف');
+}
+
+// ─── REPORTS ───
+function openReports() {
+  document.getElementById('reportsModal').classList.add('open');
+  renderReports();
+}
+function closeReports() {
+  document.getElementById('reportsModal').classList.remove('open');
+}
+
+function renderReports() {
+  const total  = packages.length;
+  const done   = packages.filter(p=>p.status==='done').length;
+  const proc   = packages.filter(p=>p.status==='processing'||p.status==='review').length;
+  const assets = packages.reduce((s,p)=>s+(p.assets_count||0),0);
+  const pct    = total ? Math.round((done/total)*100) : 0;
+  const pctMap = { done:100, processing:65, review:85, queue:10 };
+  const colorMap = { done:'var(--green)', processing:'var(--cyan)', review:'var(--gold)', queue:'var(--text-dim)' };
+
+  document.getElementById('report-stats').innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;">COMPLETION</div>
+      <div style="font-size:1.8rem;font-weight:700;color:var(--green);font-family:'Space Mono',monospace;">${pct}%</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;">ASSETS</div>
+      <div style="font-size:1.8rem;font-weight:700;color:var(--cyan);font-family:'Space Mono',monospace;">${assets.toLocaleString()}</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:6px;">IN PROGRESS</div>
+      <div style="font-size:1.8rem;font-weight:700;color:var(--gold);font-family:'Space Mono',monospace;">${proc}</div>
+    </div>`;
+
+  document.getElementById('report-packages').innerHTML = packages.length ? packages.map(p => {
+    const pp = pctMap[p.status] || 0;
+    const c  = colorMap[p.status] || 'var(--text-dim)';
+    const d  = p.created_at ? new Date(p.created_at).toLocaleDateString('ar-SA') : '—';
+    return `<div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:0.9rem;">${p.game_name}</div>
+        <div style="font-size:0.72rem;color:var(--text-dim);">${d}</div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:0.78rem;color:var(--text-dim);margin-bottom:10px;flex-wrap:wrap;">
+        <span>📁 ${(p.assets_count||0).toLocaleString()} أصل</span>
+        <span>🔧 ${p.type||'AI+Human'}</span>
+        <span style="color:${c};font-weight:600;">${pp}% مكتمل</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pp}%;background:${c};border-radius:3px;"></div>
+      </div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:30px;color:var(--text-dim);">لا توجد حزم بعد</div>';
+}
+
+function exportReport() {
+  if (!packages.length) { toast('⚠️ لا توجد بيانات للتصدير'); return; }
+  const rows = [
+    ['اللعبة','النوع','الأصول','الحالة','التاريخ'],
+    ...packages.map(p => [
+      p.game_name, p.type||'AI+Human', p.assets_count||0, p.status,
+      p.created_at ? new Date(p.created_at).toLocaleDateString('ar-SA') : '—'
+    ])
+  ];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gamelex-report.csv';
+  a.click();
+  toast('✓ تم تصدير التقرير');
+}
+
+document.getElementById('glossaryModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeGlossary(); });
+document.getElementById('reportsModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeReports(); });
+
 function timeAgo(iso) {
   if (!iso) return '—';
   const diff = Date.now() - new Date(iso).getTime();
