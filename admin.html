@@ -921,12 +921,17 @@ let allPackages = [];
 let allUsers = [];
 
 // ═══ ADMIN SECRET ═══
-const ADMIN_SECRET = 'GameLex@2025!'; // غيّر هذا لكلمة سرك
+let adminSecret = '';
+
+async function loadSecret() {
+  const { data } = await sb.from('settings').select('value').eq('key','admin_secret').single();
+  adminSecret = data?.value || 'GameLex@2025!';
+}
 
 function checkSecret() {
   const val = document.getElementById('secret-input').value;
   const errEl = document.getElementById('secret-err');
-  if (val === ADMIN_SECRET) {
+  if (val === adminSecret) {
     document.getElementById('secret-box').style.display = 'none';
     document.getElementById('login-box').style.display = 'block';
     sessionStorage.setItem('gl_secret', '1');
@@ -938,11 +943,68 @@ function checkSecret() {
   }
 }
 
-// Check if secret already passed this session
-if (sessionStorage.getItem('gl_secret') === '1') {
-  document.getElementById('secret-box').style.display = 'none';
-  document.getElementById('login-box').style.display = 'block';
+async function toggleShowSecret() {
+  const input = document.getElementById('current-secret-display');
+  const btn = document.getElementById('show-secret-btn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    input.value = adminSecret;
+    btn.textContent = '🙈 إخفاء';
+  } else {
+    input.type = 'password';
+    input.value = '••••••••';
+    btn.textContent = '👁 إظهار';
+  }
 }
+
+async function updateSecret() {
+  const newS = document.getElementById('new-secret').value.trim();
+  const conf = document.getElementById('confirm-secret').value.trim();
+  const msgEl = document.getElementById('secret-msg');
+
+  if (!newS) { showSecretMsg('⚠️ أدخل كلمة السر الجديدة', 'gold'); return; }
+  if (newS.length < 6) { showSecretMsg('⚠️ كلمة السر قصيرة جداً — 6 أحرف على الأقل', 'gold'); return; }
+  if (newS !== conf) { showSecretMsg('✕ كلمتا السر غير متطابقتين', 'red'); return; }
+
+  const { error } = await sb.from('settings')
+    .update({ value: newS, updated_at: new Date().toISOString() })
+    .eq('key', 'admin_secret');
+
+  if (error) { showSecretMsg('✕ خطأ في الحفظ: ' + error.message, 'red'); return; }
+
+  adminSecret = newS;
+  sessionStorage.setItem('gl_secret', '1');
+  document.getElementById('new-secret').value = '';
+  document.getElementById('confirm-secret').value = '';
+  document.getElementById('current-secret-display').value = '••••••••';
+  document.getElementById('current-secret-display').type = 'password';
+  document.getElementById('show-secret-btn').textContent = '👁 إظهار';
+  showSecretMsg('✓ تم تغيير كلمة السر بنجاح!', 'green');
+  toast('✓ كلمة السر الجديدة محفوظة');
+}
+
+function showSecretMsg(txt, type) {
+  const el = document.getElementById('secret-msg');
+  const colors = { green:'rgba(0,230,118,0.1)', gold:'rgba(255,214,0,0.1)', red:'rgba(255,82,82,0.1)' };
+  const borders = { green:'rgba(0,230,118,0.3)', gold:'rgba(255,214,0,0.3)', red:'rgba(255,82,82,0.3)' };
+  const textC = { green:'var(--green)', gold:'var(--gold)', red:'var(--red)' };
+  el.style.display = 'block';
+  el.style.background = colors[type];
+  el.style.border = '1px solid ' + borders[type];
+  el.style.color = textC[type];
+  el.textContent = txt;
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+// Check session + load secret
+async function initAdminSecret() {
+  await loadSecret();
+  if (sessionStorage.getItem('gl_secret') === '1') {
+    document.getElementById('secret-box').style.display = 'none';
+    document.getElementById('login-box').style.display = 'block';
+  }
+}
+initAdminSecret();
 
 // ═══ AUTH ═══
 sb.auth.onAuthStateChange((event, session) => {
