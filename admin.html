@@ -595,9 +595,24 @@ body {
     <div style="font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--green);margin-bottom:4px;">GameLex</div>
     <div style="font-size:0.75rem;color:var(--text-dim);letter-spacing:2px;">ADMIN PORTAL</div>
   </div>
-  <div class="auth-box">
-    <h2>🔐 دخول المشرف</h2>
-    <p>هذه اللوحة مخصصة لفريق GameLex فقط</p>
+
+  <!-- Step 1: Admin Secret -->
+  <div class="auth-box" id="secret-box">
+    <h2>🛡️ كلمة سر الأدمن</h2>
+    <p>أدخل كلمة السر الخاصة بلوحة الإدارة</p>
+    <div class="form-group">
+      <label class="form-label">ADMIN SECRET</label>
+      <input class="form-input" type="password" id="secret-input" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')checkSecret()">
+    </div>
+    <button class="btn-submit" onclick="checkSecret()">تحقق ←</button>
+    <div class="auth-err" id="secret-err"></div>
+  </div>
+
+  <!-- Step 2: Supabase Login (hidden until secret passes) -->
+  <div class="auth-box" id="login-box" style="display:none;">
+    <h2 data-i18n="admin_login">🔐 دخول المشرف</h2>
+    <p data-i18n="admin_only">هذه اللوحة مخصصة لفريق GameLex فقط</p>
     <div class="form-group">
       <label class="form-label">EMAIL</label>
       <input class="form-input" type="email" id="a-email" placeholder="admin@gamelex.sa">
@@ -833,43 +848,55 @@ body {
 
     <!-- ═══ SETTINGS PAGE ═══ -->
     <div class="page" id="page-settings">
-      <div class="card" style="max-width:560px;">
-        <div class="card-header"><div class="card-title">⚙️ إعدادات المنصة</div></div>
-        <div style="padding:28px;">
-          <div class="form-group">
-            <label class="form-label">SUPABASE URL</label>
-            <input class="form-input" value="https://ntecfdtkwyijhvdilyqn.supabase.co" readonly>
-          </div>
-          <div class="form-group">
-            <label class="form-label">PROJECT STATUS</label>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-              <div class="status-live">CONNECTED</div>
-              <span style="font-size:0.8rem;color:var(--text-dim);">Supabase متصل</span>
+      <div style="display:flex;flex-direction:column;gap:20px;max-width:560px;">
+
+        <!-- Admin Secret Card -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">🛡️ كلمة سر الأدمن</div></div>
+          <div style="padding:24px;">
+            <div class="form-group">
+              <label class="form-label">CURRENT SECRET</label>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:6px;">
+                <input class="form-input" type="password" id="current-secret-display" readonly
+                  style="flex:1;cursor:default;color:var(--text-dim);" value="••••••••">
+                <button onclick="toggleShowSecret()" id="show-secret-btn"
+                  style="background:var(--surface2);border:1px solid var(--border2);color:var(--text-dim);
+                  padding:10px 14px;border-radius:9px;cursor:pointer;font-size:0.82rem;white-space:nowrap;
+                  transition:all 0.2s;" onmouseover="this.style.borderColor='var(--green)'"
+                  onmouseout="this.style.borderColor='var(--border2)'">👁 إظهار</button>
+              </div>
             </div>
-          </div>
-          <div class="form-group" style="margin-top:24px;">
-            <label class="form-label">SQL — إنشاء جدول packages</label>
-            <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:16px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--cyan);line-height:1.7;margin-top:8px;white-space:pre-wrap;">create table packages (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users,
-  game_name text not null,
-  assets_count int default 0,
-  status text default 'processing',
-  type text,
-  created_at timestamptz default now()
-);
-
-alter table packages enable row level security;
-
-create policy "Users see own packages"
-on packages for select
-using (auth.uid() = user_id);
-
-create policy "Users insert own packages"
-on packages for insert
-with check (auth.uid() = user_id);</div>
+            <div class="form-group">
+              <label class="form-label">NEW SECRET</label>
+              <input class="form-input" type="password" id="new-secret" placeholder="كلمة السر الجديدة">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CONFIRM SECRET</label>
+              <input class="form-input" type="password" id="confirm-secret" placeholder="تأكيد كلمة السر">
+            </div>
+            <div id="secret-msg" style="display:none;margin-bottom:14px;padding:10px 14px;border-radius:8px;font-size:0.82rem;"></div>
+            <button class="btn-submit" onclick="updateSecret()" style="margin-top:4px;">💾 حفظ كلمة السر</button>
           </div>
         </div>
+
+        <!-- Platform Info -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ معلومات المنصة</div></div>
+          <div style="padding:24px;">
+            <div class="form-group">
+              <label class="form-label">SUPABASE URL</label>
+              <input class="form-input" value="https://ntecfdtkwyijhvdilyqn.supabase.co" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label">PROJECT STATUS</label>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+                <div class="status-live">CONNECTED</div>
+                <span style="font-size:0.8rem;color:var(--text-dim);">Supabase متصل</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -892,6 +919,30 @@ const sb = createClient(SUPA_URL, SUPA_KEY);
 let currentAdmin = null;
 let allPackages = [];
 let allUsers = [];
+
+// ═══ ADMIN SECRET ═══
+const ADMIN_SECRET = 'GameLex@2025!'; // غيّر هذا لكلمة سرك
+
+function checkSecret() {
+  const val = document.getElementById('secret-input').value;
+  const errEl = document.getElementById('secret-err');
+  if (val === ADMIN_SECRET) {
+    document.getElementById('secret-box').style.display = 'none';
+    document.getElementById('login-box').style.display = 'block';
+    sessionStorage.setItem('gl_secret', '1');
+  } else {
+    errEl.textContent = '✕ كلمة السر غير صحيحة';
+    errEl.style.display = 'block';
+    document.getElementById('secret-input').value = '';
+    document.getElementById('secret-input').focus();
+  }
+}
+
+// Check if secret already passed this session
+if (sessionStorage.getItem('gl_secret') === '1') {
+  document.getElementById('secret-box').style.display = 'none';
+  document.getElementById('login-box').style.display = 'block';
+}
 
 // ═══ AUTH ═══
 sb.auth.onAuthStateChange((event, session) => {
