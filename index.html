@@ -152,12 +152,14 @@
     background: rgba(0,230,118,0.1);
     border: 1px solid rgba(0,230,118,0.3);
     border-radius: 100px;
-    padding: 6px 16px;
-    font-size: 0.8rem;
+    padding: 7px 18px;
+    font-size: 0.82rem;
     color: var(--green);
     margin-bottom: 28px;
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 1px;
+    font-family: 'Tajawal', sans-serif;
+    letter-spacing: 0;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   .hero-badge::before {
@@ -242,22 +244,29 @@
     left: 48px;
     bottom: 80px;
     display: flex;
-    gap: 48px;
+    gap: 40px;
     z-index: 1;
   }
 
-  .stat-item { text-align: center; }
+  .stat-item {
+    text-align: center;
+    background: rgba(0,230,118,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+  }
   .stat-num {
     font-family: 'Space Mono', monospace;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--green);
     line-height: 1;
   }
   .stat-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
-    margin-top: 4px;
+    margin-top: 5px;
+    white-space: nowrap;
   }
 
   /* hero visual */
@@ -1115,7 +1124,15 @@
     .stats-strip { grid-template-columns: repeat(2, 1fr); padding: 40px 18px; gap: 16px; }
     .big-stat .num { font-size: 2rem; }
     footer { flex-direction: column; gap: 12px; text-align: center; padding: 28px 18px; }
-    .hero-stats { position: static; margin-top: 36px; justify-content: center; flex-wrap: wrap; gap: 28px; }
+    .hero-stats {
+      position: static;
+      margin-top: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .stat-item { padding: 10px 16px; }
+    .stat-num { font-size: 1.3rem; }
     .price-card.featured { transform: scale(1); }
     .platform-mockup { width: 100% !important; }
     .modal { padding: 28px 20px; }
@@ -1142,7 +1159,6 @@
     .logo { font-size: 1.3rem; }
     section { padding: 40px 14px; }
     .section-title { font-size: 1.5rem; }
-    .hero-stats .stat-num { font-size: 1.4rem; }
   }
 </style>
 </head>
