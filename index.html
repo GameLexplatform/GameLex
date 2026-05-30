@@ -1097,19 +1097,52 @@
   }
 
   @media (max-width: 900px) {
-    nav { padding: 16px 24px; }
+    nav { padding: 14px 18px; }
     .nav-links { display: none; }
-    .hero { padding: 120px 24px 60px; }
+    .hero { padding: 100px 18px 60px; min-height: auto; }
     .hero-visual { display: none; }
-    section { padding: 60px 24px; }
+    .hero h1 { font-size: 2.2rem; letter-spacing: -1px; }
+    .hero p { font-size: 1rem; }
+    .hero-actions { flex-direction: column; }
+    .hero-actions .btn-primary,
+    .hero-actions .btn-secondary { width: 100%; justify-content: center; }
+    section { padding: 52px 18px; }
     .features-grid, .pricing-grid { grid-template-columns: 1fr; }
     .upload-grid { grid-template-columns: 1fr; }
     .dash-body { grid-template-columns: 1fr; }
     .dash-sidebar { display: none; }
     .dash-row { grid-template-columns: 1fr 1fr; }
-    .stats-strip { grid-template-columns: repeat(2, 1fr); }
-    footer { flex-direction: column; gap: 16px; text-align: center; }
-    .hero-stats { position: static; margin-top: 40px; justify-content: center; }
+    .stats-strip { grid-template-columns: repeat(2, 1fr); padding: 40px 18px; gap: 16px; }
+    .big-stat .num { font-size: 2rem; }
+    footer { flex-direction: column; gap: 12px; text-align: center; padding: 28px 18px; }
+    .hero-stats { position: static; margin-top: 36px; justify-content: center; flex-wrap: wrap; gap: 28px; }
+    .price-card.featured { transform: scale(1); }
+    .platform-mockup { width: 100% !important; }
+    .modal { padding: 28px 20px; }
+    .section-title { font-size: 1.8rem; }
+    .table-head, .table-row { grid-template-columns: 2fr 1fr 1fr; }
+    .table-head span:nth-child(3),
+    .table-row > div:nth-child(3) { display: none; }
+    #nav-login-btn { display: none; }
+    .dash-main { padding: 16px; }
+    .dash-metric { padding: 14px; }
+    .metric-val { font-size: 1.3rem; }
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 1.8rem; }
+    .stats-strip { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 28px 14px; }
+    .dash-row { grid-template-columns: 1fr; }
+    .features-grid .feature-card { padding: 24px 20px; }
+    .upload-zone { padding: 36px 20px; }
+    .option-card { padding: 14px 16px; }
+    .pricing-grid { gap: 16px; }
+    .price-card { padding: 28px 22px; }
+    nav { padding: 12px 14px; }
+    .logo { font-size: 1.3rem; }
+    section { padding: 40px 14px; }
+    .section-title { font-size: 1.5rem; }
+    .hero-stats .stat-num { font-size: 1.4rem; }
   }
 </style>
 </head>

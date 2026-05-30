@@ -545,12 +545,46 @@ body {
 .loading-row td { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding: 40px !important; }
 
 @media(max-width:900px){
-  .sidebar { display: none; }
-  .main { margin-right: 0; }
-  .stats-row { grid-template-columns: repeat(2,1fr); }
-  .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .content { padding: 20px; }
+  .sidebar { display:none; }
+  .sidebar.mobile-open { display:flex; z-index:200; }
+  .main { margin-right:0; }
+  .stats-row { grid-template-columns:repeat(2,1fr); gap:12px; }
+  .grid-2, .grid-3 { grid-template-columns:1fr; }
+  .content { padding:16px; }
+  .topbar { padding:12px 16px; }
+  .topbar-title { font-size:0.9rem; }
+  .data-table th, .data-table td { padding:10px 12px; font-size:0.78rem; }
+  .stat-val { font-size:1.5rem; }
+  .card-header { padding:14px 16px; }
+  .auth-box { padding:32px 24px; }
+  .mini-chart { height:90px; }
+  #gl-lang-picker { display:none; }
 }
+@media(max-width:480px){
+  .stats-row { grid-template-columns:1fr 1fr; gap:10px; }
+  .stat-card { padding:16px; }
+  .stat-val { font-size:1.3rem; }
+  .topbar { padding:10px 12px; }
+  .content { padding:12px; }
+  .data-table { font-size:0.75rem; }
+  .action-btn { padding:3px 7px; font-size:0.68rem; }
+}
+</style>
+
+<!-- Mobile sidebar overlay -->
+<style>
+.mob-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.6); z-index:199;
+}
+.mob-overlay.open { display:block; }
+.mob-menu-btn {
+  display:none; background:none;
+  border:1px solid var(--border2); color:var(--text);
+  padding:6px 10px; border-radius:7px; cursor:pointer;
+  font-size:1rem;
+}
+@media(max-width:900px){ .mob-menu-btn { display:flex; align-items:center; } }
 </style>
 </head>
 <body>
@@ -629,7 +663,10 @@ body {
 <!-- ═══ MAIN ═══ -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title" id="page-title">📊 نظرة عامة</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="page-title">📊 نظرة عامة</div>
+    </div>
     <div class="topbar-right">
       <div id="gl-lang-picker"></div>
       <div class="status-live">LIVE</div>
@@ -841,6 +878,9 @@ with check (auth.uid() = user_id);</div>
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Mobile overlay -->
+<div class="mob-overlay" id="mobOverlay" onclick="toggleSidebar()"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1170,6 +1210,12 @@ sb.auth.getSession().then(({ data: { session } }) => {
 
 // Init i18n
 i18n.init('gl-lang-picker');
+
+// Mobile sidebar
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('mobile-open');
+  document.getElementById('mobOverlay').classList.toggle('open');
+}
 </script>
 </body>
 </html>
