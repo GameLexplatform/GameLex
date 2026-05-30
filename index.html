@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameLex — منصة توطين الألعاب</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="i18n.js"></script>
+<style>
+  :root {
+    --bg: #030b12;
+    --surface: #071520;
+    --surface2: #0c1f2e;
+    --green: #00e676;
+    --green-dim: #00a152;
+    --cyan: #00e5ff;
+    --gold: #ffd600;
+    --text: #e8f4f8;
+    --text-dim: #7b9aaa;
+    --border: rgba(0,230,118,0.15);
+    --glow: 0 0 40px rgba(0,230,118,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,230,118,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,230,118,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ═══ NAV ═══ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(3,11,18,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--green);
+    letter-spacing: -1px;
+    text-shadow: 0 0 30px rgba(0,230,118,0.5);
+  }
+
+  .logo span { color: var(--text); }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .nav-links a:hover { color: var(--green); }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .lang-btn {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+  .lang-btn.active {
+    background: var(--green);
+    color: #000;
+    font-weight: 700;
+  }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 140px 48px 80px;
+    overflow: hidden;
+  }
+
+  .hero-bg-circle {
+    position: absolute;
+    top: -200px;
+    left: -200px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(0,230,118,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-bg-circle2 {
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    color: var(--green);
+    margin-bottom: 28px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+
+  .hero h1 {
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -2px;
+  }
+
+  .hero h1 .accent { color: var(--green); }
+  .hero h1 .accent2 { color: var(--cyan); }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 40px;
+    max-width: 560px;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #000;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,230,118,0.35);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: 'Tajawal', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* hero stats */
+  .hero-stats {
+    position: absolute;
+    left: 48px;
+    bottom: 80px;
+    display: flex;
+    gap: 48px;
+    z-index: 1;
+  }
+
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* hero visual */
+  .hero-visual {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 48px;
+    display: flex;
+    justify-content: flex-start;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .platform-mockup {
+    width: 520px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--glow), 0 40px 80px rgba(0,0,0,0.5);
+    animation: float 6s ease-in-out infinite;
+    pointer-events: all;
+    position: absolute;
+    left: auto;
+    right: 0;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .mockup-header {
+    background: var(--surface2);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mockup-dots { display: flex; gap: 6px; }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+
+  .mockup-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    flex: 1;
+    text-align: center;
+  }
+
+  .mockup-body { padding: 20px; }
+
+  .package-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(0,230,118,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  .package-row:hover {
+    background: rgba(0,230,118,0.08);
+    border-color: rgba(0,230,118,0.3);
+  }
+
+  .pkg-info { display: flex; align-items: center; gap: 12px; }
+  .pkg-icon {
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+  .pkg-name { font-size: 0.9rem; font-weight: 600; }
+  .pkg-meta { font-size: 0.72rem; color: var(--text-dim); font-family: 'Space Mono', monospace; }
+
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+  }
+  .status-done { background: rgba(0,230,118,0.15); color: var(--green); }
+  .status-proc { background: rgba(0,229,255,0.15); color: var(--cyan); }
+  .status-wait { background: rgba(255,214,0,0.15); color: var(--gold); }
+
+  .mockup-progress {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 10px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    color: var(--text-dim);
+  }
+  .progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    border-radius: 3px;
+    width: 68%;
+    animation: progress-anim 3s ease-in-out infinite alternate;
+  }
+  @keyframes progress-anim {
+    from { width: 55%; }
+    to { width: 78%; }
+  }
+
+  /* ═══ SECTIONS ═══ */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 48px;
+  }
+
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    max-width: 560px;
+    font-weight: 300;
+  }
+
+  /* ═══ UPLOAD SECTION ═══ */
+  .upload-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+    margin-top: 60px;
+  }
+
+  .upload-zone {
+    border: 2px dashed rgba(0,230,118,0.3);
+    border-radius: 16px;
+    padding: 60px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(0,230,118,0.02);
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-zone:hover {
+    border-color: var(--green);
+    background: rgba(0,230,118,0.05);
+    transform: scale(1.01);
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .upload-zone h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+  .upload-zone p {
+    color: var(--text-dim);
+    font-size: 0.88rem;
+  }
+  .upload-types {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .type-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--text-dim);
+  }
+
+  .upload-options { display: flex; flex-direction: column; gap: 16px; }
+
+  .option-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .option-card:hover {
+    border-color: var(--green);
+    box-shadow: var(--glow);
+  }
+  .option-card.selected {
+    border-color: var(--green);
+    background: rgba(0,230,118,0.05);
+  }
+
+  .option-icon {
+    width: 44px; height: 44px;
+    background: rgba(0,230,118,0.1);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .option-text h4 { font-size: 0.95rem; margin-bottom: 4px; }
+  .option-text p { font-size: 0.82rem; color: var(--text-dim); }
+
+  /* ═══ FEATURES ═══ */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover {
+    border-color: rgba(0,230,118,0.3);
+    transform: translateY(-4px);
+    box-shadow: var(--glow);
+  }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--green);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+  }
+  .feature-icon-wrap {
+    width: 52px; height: 52px;
+    background: rgba(0,230,118,0.1);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  .feature-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .feature-card p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* ═══ STATS STRIP ═══ */
+  .stats-strip {
+    background: linear-gradient(135deg, rgba(0,230,118,0.08), rgba(0,229,255,0.05));
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    text-align: center;
+  }
+
+  .big-stat .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .big-stat .label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  /* ═══ DASHBOARD DEMO ═══ */
+  .dashboard-wrap {
+    margin-top: 60px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--glow);
+  }
+
+  .dash-header {
+    background: var(--surface2);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .dash-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .dash-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--green);
+    font-family: 'Space Mono', monospace;
+  }
+  .dash-status::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .dash-body {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 420px;
+  }
+
+  .dash-sidebar {
+    border-left: 1px solid var(--border);
+    padding: 24px 20px;
+  }
+
+  [dir="rtl"] .dash-sidebar { border-left: none; border-right: 1px solid var(--border); }
+
+  .dash-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+    font-size: 0.88rem;
+  }
+  .dash-nav-item:hover { background: rgba(0,230,118,0.05); }
+  .dash-nav-item.active {
+    background: rgba(0,230,118,0.1);
+    color: var(--green);
+  }
+  .dash-nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  .dash-main { padding: 28px; }
+
+  .dash-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .dash-metric {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .metric-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-family: 'Space Mono', monospace;
+  }
+  .metric-val {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    color: var(--green);
+  }
+  .metric-change {
+    font-size: 0.72rem;
+    color: var(--green);
+    margin-top: 4px;
+  }
+
+  .dash-table {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-head {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 12px 20px;
+    background: rgba(0,230,118,0.05);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .table-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.85rem;
+    align-items: center;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .table-row:hover { background: rgba(0,230,118,0.03); }
+  .table-row:last-child { border-bottom: none; }
+
+  .game-cell { display: flex; align-items: center; gap: 10px; }
+  .game-emoji { font-size: 1.2rem; }
+  .game-name { font-weight: 600; }
+  .game-sub { font-size: 0.72rem; color: var(--text-dim); }
+
+  .progress-mini {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    width: 80px;
+  }
+  .progress-mini-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  /* ═══ PRICING ═══ */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+    align-items: start;
+  }
+
+  .price-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .price-card.featured {
+    border-color: var(--green);
+    background: linear-gradient(135deg, rgba(0,230,118,0.05), var(--surface));
+    box-shadow: var(--glow);
+    transform: scale(1.03);
+  }
+
+  .price-badge {
+    position: absolute;
+    top: -12px;
+    right: 50%;
+    transform: translateX(50%);
+    background: var(--green);
+    color: #000;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .price-plan {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .price-amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .price-amount .currency { font-size: 1rem; color: var(--text-dim); }
+  .price-period { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 28px; }
+
+  .price-features { list-style: none; margin-bottom: 32px; }
+  .price-features li {
+    padding: 8px 0;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .price-features li:last-child { border-bottom: none; }
+  .check { color: var(--green); font-size: 1rem; }
+
+  /* ═══ CTA ═══ */
+  .cta-section {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(0,230,118,0.06), rgba(0,229,255,0.04), transparent);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cta-section h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+
+  .cta-section p {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  /* ═══ FOOTER ═══ */
+  footer {
+    position: relative;
+    z-index: 1;
+    padding: 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--green);
+  }
+
+  .footer-copy {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ═══ ENGLISH MODE ═══ */
+  body.en { font-family: 'Syne', sans-serif; direction: ltr; }
+  body.en .ar { display: none; }
+  body.ar .en { display: none; }
+
+  .ar-text, .en-text { display: none; }
+  body.en .en-text { display: block; }
+  body.ar .ar-text { display: block; }
+  body.en .en-inline { display: inline; }
+  body.ar .ar-inline { display: inline; }
+  .en-inline, .ar-inline { display: none; }
+
+  /* default show Arabic */
+  .ar-text { display: block; }
+  .ar-inline { display: inline; }
+
+  /* divider */
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: var(--green);
+    margin: 20px 0;
+    border-radius: 2px;
+  }
+
+  /* scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ═══ AUTH MODAL ═══ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 44px;
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), var(--glow);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--green);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .modal-sub {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 32px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+    gap: 4px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 9px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    font-family: 'Tajawal', sans-serif;
+  }
+  .auth-tab.active {
+    background: var(--green);
+    color: #000;
+  }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-bottom: 7px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-family: 'Tajawal', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    direction: ltr;
+  }
+  .form-input:focus { border-color: var(--green); }
+  .form-input::placeholder { color: var(--text-dim); }
+
+  .auth-error {
+    background: rgba(255,80,80,0.1);
+    border: 1px solid rgba(255,80,80,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #ff6b6b;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .auth-success {
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: var(--green);
+    margin-bottom: 16px;
+    display: none;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .btn-auth {
+    width: 100%;
+    background: var(--green);
+    color: #000;
+    border: none;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-auth:hover { box-shadow: 0 6px 24px rgba(0,230,118,0.35); }
+  .btn-auth:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* User menu in nav */
+  .user-chip {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,230,118,0.1);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px 6px 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+  }
+  .user-chip:hover { border-color: var(--green); }
+  .user-avatar {
+    width: 26px; height: 26px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #000;
+  }
+
+  /* Packages saved indicator */
+  .saved-tag {
+    background: rgba(0,230,118,0.12);
+    border: 1px solid rgba(0,230,118,0.25);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    color: var(--green);
+    font-family: 'Space Mono', monospace;
+    margin-right: 6px;
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 120px 24px 60px; }
+    .hero-visual { display: none; }
+    section { padding: 60px 24px; }
+    .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .upload-grid { grid-template-columns: 1fr; }
+    .dash-body { grid-template-columns: 1fr; }
+    .dash-sidebar { display: none; }
+    .dash-row { grid-template-columns: 1fr 1fr; }
+    .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+    .hero-stats { position: static; margin-top: 40px; justify-content: center; }
+  }
+</style>
+</head>
+<body class="ar-mode" id="body">
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="logo">Game<span>Lex</span></div>
+  <ul class="nav-links">
+    <li><a href="#features"><span class="ar-inline">المنصة</span><span class="en-inline">Platform</span></a></li>
+    <li><a href="#dashboard"><span class="ar-inline">لوحة التحكم</span><span class="en-inline">Dashboard</span></a></li>
+    <li><a href="#pricing"><span class="ar-inline">الأسعار</span><span class="en-inline">Pricing</span></a></li>
+    <li><a href="#upload"><span class="ar-inline">ابدأ الآن</span><span class="en-inline">Get Started</span></a></li>
+  </ul>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <div id="gl-lang-picker"></div>
+    <button class="btn-primary" id="nav-login-btn" onclick="openAuth()" style="padding:8px 18px;font-size:0.85rem;">
+      <span data-i18n="nav_login">🔐 دخول</span>
+    </button>
+    <div class="user-chip" id="user-chip" onclick="doLogout()" title="تسجيل خروج">
+      <div class="user-avatar" id="user-initial">?</div>
+      <span id="user-email-short" style="font-size:0.8rem;"></span>
+      <span style="color:var(--text-dim);font-size:0.75rem;">✕</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" style="padding-top:120px;">
+  <div class="hero-bg-circle"></div>
+  <div class="hero-bg-circle2"></div>
+
+  <div class="hero-content reveal">
+    <div class="hero-badge">
+      <span data-i18n="hero_badge">مدعوم بالذكاء الاصطناعي</span>
+    </div>
+
+    <h1>
+      <span data-i18n="hero_h1_1">نُعيد صياغة</span><br>
+      <span class="accent" data-i18n="hero_h1_2">تجربة اللعب</span><br>
+      <span data-i18n="hero_h1_3">بروح</span> <span class="accent2" data-i18n="hero_h1_4">سعودية</span>
+    </h1>
+
+    <div class="divider"></div>
+
+    <p data-i18n="hero_desc">منصة توطين ذكية تجمع قوة الذكاء الاصطناعي مع الدقة الثقافية السعودية.</p>
+
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})">
+        <span data-i18n="hero_cta1">🚀 ابدأ التوطين</span>
+      </button>
+      <button class="btn-secondary" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">
+        <span data-i18n="hero_cta2">عرض المنصة</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating mockup -->
+  <div class="hero-visual">
+    <div class="platform-mockup">
+      <div class="mockup-header">
+        <div class="mockup-dots">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+        </div>
+        <div class="mockup-title">GameLex Platform — Active Packages</div>
+      </div>
+      <div class="mockup-body">
+        <div class="package-row">
+          <div class="pkg-info">
+            <div class="pkg-icon">⚔️</div>
+            <div>
+              <div class="pkg-name">Starbound: Eclipse</div>
+              <div class="pkg-meta">342 assets // AR+EN</div>
+            </div>
+          </div>
+          <div class="status-badge status-done">✓ DONE</div>
+        </div>
+        <div class="package-row">
+          <div class="pkg-info">
+            <div class="pkg-icon">🔫</div>
+            <div>
+              <div class="pkg-name">Modern Warfare VIII</div>
+              <div class="pkg-meta">899 assets // RTL</div>
+            </div>
+          </div>
+          <div class="status-badge status-proc">⟳ PROCESSING</div>
+        </div>
+        <div class="package-row">
+          <div class="pkg-info">
+            <div class="pkg-icon">🏎️</div>
+            <div>
+              <div class="pkg-name">Desert Rush Pro</div>
+              <div class="pkg-meta">125 assets // AR</div>
+            </div>
+          </div>
+          <div class="status-badge status-wait">⏳ REVIEW</div>
+        </div>
+        <div class="mockup-progress">
+          <div class="progress-header">
+            <span>GameLex-AI Processing</span>
+            <span style="color:var(--green);font-family:'Space Mono',monospace;">68%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">+21M</div>
+      <div class="stat-label" data-i18n="stat_gamers">لاعب في السعودية</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">1.13B</div>
+      <div class="stat-label" data-i18n="stat_market">دولار حجم السوق</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">6%</div>
+      <div class="stat-label" data-i18n="stat_growth">نمو سنوي</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS STRIP ═══ -->
+<div class="stats-strip reveal">
+  <div class="big-stat">
+    <div class="num">10x</div>
+    <div class="label" data-i18n="faster">أسرع من الترجمة التقليدية</div>
+  </div>
+  <div class="big-stat">
+    <div class="num">99%</div>
+    <div class="label" data-i18n="accuracy">دقة ثقافية مضمونة</div>
+  </div>
+  <div class="big-stat">
+    <div class="num">50+</div>
+    <div class="label" data-i18n="games_local">لعبة موطّنة</div>
+  </div>
+  <div class="big-stat">
+    <div class="num">-60%</div>
+    <div class="label" data-i18n="cost_red">تخفيض في التكلفة</div>
+  </div>
+</div>
+
+<!-- ═══ UPLOAD ═══ -->
+<section id="upload">
+  <div class="reveal">
+    <div class="section-tag">
+      <span class="ar-inline">// ابدأ مشروعك</span>
+      <span class="en-inline">// START YOUR PROJECT</span>
+    </div>
+    <h2 class="section-title">
+      <span class="ar-text">ارفع حزمة التوطين</span>
+      <span class="en-text">Upload Localization Package</span>
+    </h2>
+    <p class="section-sub">
+      <span class="ar-text">ارفع ملفاتك وسيتولى GameLex-AI المعالجة الذكية مع مراجعة بشرية احترافية.</span>
+      <span class="en-text">Upload your files and let GameLex-AI handle intelligent processing with professional human review.</span>
+    </p>
+  </div>
+
+  <div class="upload-grid reveal">
+    <div class="upload-zone" onclick="simulateUpload(this)">
+      <span class="upload-icon">📦</span>
+      <h3>
+        <span class="ar-text">اسحب الملفات هنا</span>
+        <span class="en-text">Drop files here</span>
+      </h3>
+      <p>
+        <span class="ar-text">أو اضغط للاختيار</span>
+        <span class="en-text">or click to browse</span>
+      </p>
+      <div class="upload-types">
+        <span class="type-tag">.PO</span>
+        <span class="type-tag">.XLIFF</span>
+        <span class="type-tag">.JSON</span>
+        <span class="type-tag">.CSV</span>
+        <span class="type-tag">.PNG</span>
+        <span class="type-tag">.MP3</span>
+      </div>
+    </div>
+
+    <div class="upload-options">
+      <div class="option-card selected" onclick="selectOption(this)">
+        <div class="option-icon">🤖</div>
+        <div class="option-text">
+          <h4><span class="ar-text">AI + مراجعة بشرية</span><span class="en-text">AI + Human Review</span></h4>
+          <p><span class="ar-text">أعلى دقة — موصى به للألعاب الكبرى</span><span class="en-text">Highest accuracy — recommended for AAA games</span></p>
+        </div>
+      </div>
+      <div class="option-card" onclick="selectOption(this)">
+        <div class="option-icon">⚡</div>
+        <div class="option-text">
+          <h4><span class="ar-text">AI سريع</span><span class="en-text">Fast AI Only</span></h4>
+          <p><span class="ar-text">أسرع تسليم — مناسب للتحديثات</span><span class="en-text">Fastest delivery — good for updates</span></p>
+        </div>
+      </div>
+      <div class="option-card" onclick="selectOption(this)">
+        <div class="option-icon">👁️</div>
+        <div class="option-text">
+          <h4><span class="ar-text">مراجعة إضافية</span><span class="en-text">Premium Review</span></h4>
+          <p><span class="ar-text">فريق لغوي متخصص + اختبار جودة</span><span class="en-text">Specialist team + QA testing</span></p>
+        </div>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center;" onclick="simulateLaunch()">
+        <span class="ar-inline">🚀 إطلاق الحزمة</span>
+        <span class="en-inline">🚀 Launch Package</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Launch notification -->
+  <div id="launch-notif" style="display:none;margin-top:24px;padding:18px 28px;background:rgba(0,230,118,0.1);border:1px solid var(--green);border-radius:12px;font-family:'Space Mono',monospace;font-size:0.85rem;color:var(--green);">
+    ✓ &nbsp; <span class="ar-inline">تم إطلاق الحزمة بنجاح! سيتم معالجتها خلال 2-4 ساعات.</span>
+    <span class="en-inline">Package launched successfully! Processing in 2-4 hours.</span>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section id="features" style="background:var(--surface);">
+  <div class="reveal">
+    <div class="section-tag">
+      <span class="ar-inline">// الركائز التقنية</span>
+      <span class="en-inline">// TECH PILLARS</span>
+    </div>
+    <h2 class="section-title">
+      <span class="ar-text">ثلاثة محاور، قوة واحدة</span>
+      <span class="en-text">Three Pillars, One Power</span>
+    </h2>
+    <p class="section-sub">
+      <span class="ar-text">تقنية متكاملة تضمن أعلى جودة توطين للألعاب العربية.</span>
+      <span class="en-text">Integrated technology ensuring the highest quality game localization for Arabic.</span>
+    </p>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feature-num">01</div>
+      <div class="feature-icon-wrap">🧠</div>
+      <h3><span class="ar-text">GameLex-AI</span><span class="en-text">GameLex-AI</span></h3>
+      <p>
+        <span class="ar-text">نموذج مخصص لعالم الألعاب يتعلم من كل مشروع ويحسّن دقته أسبوعياً — بفهم عميق لسياق وثقافة اللعب العربي.</span>
+        <span class="en-text">A model custom-built for gaming, learning from every project and improving weekly — with deep understanding of Arabic gaming context and culture.</span>
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">02</div>
+      <div class="feature-icon-wrap">🎭</div>
+      <h3><span class="ar-text">Multimodal AI</span><span class="en-text">Multimodal AI</span></h3>
+      <p>
+        <span class="ar-text">معالجة متكاملة للنصوص والصوت والصور — استخراج النصوص من الصور مع الحفاظ على التصميم الأصلي تماماً.</span>
+        <span class="en-text">Integrated processing of text, audio, and images — extracting text from images while preserving the original design perfectly.</span>
+      </p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">03</div>
+      <div class="feature-icon-wrap">🔄</div>
+      <h3><span class="ar-text">Human-in-the-Loop</span><span class="en-text">Human-in-the-Loop</span></h3>
+      <p>
+        <span class="ar-text">بيئة عمل موحدة تُمكّن المترجم من المراجعة والتعديل وإعادة التسليم بنفس الصيغ الأصلية — دون أي خطوات تقنية معقدة.</span>
+        <span class="en-text">Unified workspace enabling translators to review, edit, and redeliver in original formats — without complex technical steps.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DASHBOARD ═══ -->
+<section id="dashboard">
+  <div class="reveal">
+    <div class="section-tag">
+      <span class="ar-inline">// لوحة التحكم</span>
+      <span class="en-inline">// CONTROL PANEL</span>
+    </div>
+    <h2 class="section-title">
+      <span class="ar-text">كل مشاريعك في مكان واحد</span>
+      <span class="en-text">All your projects, one place</span>
+    </h2>
+  </div>
+
+  <div class="dashboard-wrap reveal">
+    <div class="dash-header">
+      <span class="dash-title">GameLex Dashboard v2.4</span>
+      <span class="dash-status">
+        <span class="ar-inline">النظام يعمل</span>
+        <span class="en-inline">System Online</span>
+      </span>
+    </div>
+    <div class="dash-body">
+      <div class="dash-sidebar">
+        <div class="dash-nav-item active">📊 <span class="ar-inline">نظرة عامة</span><span class="en-inline">Overview</span></div>
+        <div class="dash-nav-item">📦 <span class="ar-inline">الحزم</span><span class="en-inline">Packages</span></div>
+        <div class="dash-nav-item">🔤 <span class="ar-inline">المصطلحات</span><span class="en-inline">Glossary</span></div>
+        <div class="dash-nav-item">👥 <span class="ar-inline">الفريق</span><span class="en-inline">Team</span></div>
+        <div class="dash-nav-item">📈 <span class="ar-inline">التقارير</span><span class="en-inline">Reports</span></div>
+        <div class="dash-nav-item">⚙️ <span class="ar-inline">الإعدادات</span><span class="en-inline">Settings</span></div>
+      </div>
+
+      <div class="dash-main">
+        <div class="dash-row">
+          <div class="dash-metric">
+            <div class="metric-label">PACKAGES</div>
+            <div class="metric-val">24</div>
+            <div class="metric-change">↑ +3 هذا الشهر</div>
+          </div>
+          <div class="dash-metric">
+            <div class="metric-label">ASSETS</div>
+            <div class="metric-val">18.4K</div>
+            <div class="metric-change">↑ +2.1K</div>
+          </div>
+          <div class="dash-metric">
+            <div class="metric-label">AI ACCURACY</div>
+            <div class="metric-val">97.2%</div>
+            <div class="metric-change">↑ +0.4%</div>
+          </div>
+        </div>
+
+        <div class="dash-table">
+          <div class="table-head">
+            <span><span class="ar-inline">اللعبة</span><span class="en-inline">Game</span></span>
+            <span><span class="ar-inline">التقدم</span><span class="en-inline">Progress</span></span>
+            <span><span class="ar-inline">الأصول</span><span class="en-inline">Assets</span></span>
+            <span><span class="ar-inline">الحالة</span><span class="en-inline">Status</span></span>
+          </div>
+          <div id="packages-tbody">
+          <div class="table-row">
+            <div class="game-cell">
+              <span class="game-emoji">⚔️</span>
+              <div>
+                <div class="game-name">Starbound: Eclipse</div>
+                <div class="game-sub">AAA • Action RPG</div>
+              </div>
+            </div>
+            <div>
+              <div class="progress-mini"><div class="progress-mini-fill" style="width:100%;background:var(--green);"></div></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">342</div>
+            <div><span class="status-badge status-done">✓ DONE</span></div>
+          </div>
+          <div class="table-row">
+            <div class="game-cell">
+              <span class="game-emoji">🔫</span>
+              <div>
+                <div class="game-name">Modern Warfare VIII</div>
+                <div class="game-sub">AAA • FPS</div>
+              </div>
+            </div>
+            <div>
+              <div class="progress-mini"><div class="progress-mini-fill" style="width:68%;background:var(--cyan);"></div></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">899</div>
+            <div><span class="status-badge status-proc">⟳ AI</span></div>
+          </div>
+          <div class="table-row">
+            <div class="game-cell">
+              <span class="game-emoji">🏎️</span>
+              <div>
+                <div class="game-name">Desert Rush Pro</div>
+                <div class="game-sub">Indie • Racing</div>
+              </div>
+            </div>
+            <div>
+              <div class="progress-mini"><div class="progress-mini-fill" style="width:45%;background:var(--gold);"></div></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">125</div>
+            <div><span class="status-badge status-wait">⏳ QA</span></div>
+          </div>
+          <div class="table-row">
+            <div class="game-cell">
+              <span class="game-emoji">🗡️</span>
+              <div>
+                <div class="game-name">Neon Citadel</div>
+                <div class="game-sub">Indie • Strategy</div>
+              </div>
+            </div>
+            <div>
+              <div class="progress-mini"><div class="progress-mini-fill" style="width:12%;background:rgba(0,230,118,0.4);"></div></div>
+            </div>
+            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">67</div>
+            <div><span class="status-badge status-wait">⏳ QUEUE</span></div>
+          </div>
+          </div><!-- end packages-tbody -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section id="pricing" style="background:var(--surface);">
+  <div class="reveal">
+    <div class="section-tag">
+      <span class="ar-inline">// الأسعار</span>
+      <span class="en-inline">// PRICING</span>
+    </div>
+    <h2 class="section-title">
+      <span class="ar-text">خطة لكل حجم مشروع</span>
+      <span class="en-text">A plan for every project size</span>
+    </h2>
+  </div>
+
+  <div class="pricing-grid reveal">
+    <div class="price-card">
+      <div class="price-plan">INDIE</div>
+      <div class="price-amount"><span class="currency">$</span>299</div>
+      <div class="price-period">
+        <span class="ar-inline">لكل 1,000 أصل</span>
+        <span class="en-inline">per 1,000 assets</span>
+      </div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> <span class="ar-inline">ترجمة AI كاملة</span><span class="en-inline">Full AI translation</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">دعم RTL</span><span class="en-inline">RTL support</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">تسليم خلال 48 ساعة</span><span class="en-inline">48h delivery</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">3 مراجعات</span><span class="en-inline">3 revisions</span></li>
+      </ul>
+      <button class="btn-secondary" style="width:100%;">
+        <span class="ar-inline">ابدأ مجاناً</span>
+        <span class="en-inline">Start Free</span>
+      </button>
+    </div>
+
+    <div class="price-card featured">
+      <div class="price-badge">
+        <span class="ar-inline">الأكثر طلباً</span>
+        <span class="en-inline">Most Popular</span>
+      </div>
+      <div class="price-plan">STUDIO</div>
+      <div class="price-amount"><span class="currency">$</span>899</div>
+      <div class="price-period">
+        <span class="ar-inline">لكل 5,000 أصل</span>
+        <span class="en-inline">per 5,000 assets</span>
+      </div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> <span class="ar-inline">AI + مراجعة بشرية</span><span class="en-inline">AI + Human review</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">دقة ثقافية سعودية</span><span class="en-inline">Saudi cultural accuracy</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">تسليم خلال 24 ساعة</span><span class="en-inline">24h delivery</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">مراجعات غير محدودة</span><span class="en-inline">Unlimited revisions</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">مصطلحات مخصصة</span><span class="en-inline">Custom glossary</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">اختبار جودة لغوية</span><span class="en-inline">Linguistic QA testing</span></li>
+      </ul>
+      <button class="btn-primary" style="width:100%;justify-content:center;">
+        <span class="ar-inline">احجز الآن</span>
+        <span class="en-inline">Book Now</span>
+      </button>
+    </div>
+
+    <div class="price-card">
+      <div class="price-plan">AAA ENTERPRISE</div>
+      <div class="price-amount" style="font-size:1.8rem;">
+        <span class="ar-inline">تسعير مخصص</span>
+        <span class="en-inline">Custom</span>
+      </div>
+      <div class="price-period">
+        <span class="ar-inline">حسب حجم المشروع</span>
+        <span class="en-inline">based on project scope</span>
+      </div>
+      <ul class="price-features">
+        <li><span class="check">✓</span> <span class="ar-inline">فريق مخصص</span><span class="en-inline">Dedicated team</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">نموذج AI مخصص</span><span class="en-inline">Custom AI model</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">تكامل مباشر مع pipeline</span><span class="en-inline">Direct pipeline integration</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">Revenue Share متاح</span><span class="en-inline">Revenue Share available</span></li>
+        <li><span class="check">✓</span> <span class="ar-inline">دعم 24/7</span><span class="en-inline">24/7 support</span></li>
+      </ul>
+      <button class="btn-secondary" style="width:100%;">
+        <span class="ar-inline">تواصل معنا</span>
+        <span class="en-inline">Contact Us</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section reveal">
+  <h2>
+    <span class="ar-text">جاهز تطلق لعبتك<br><span class="accent">للعالم العربي؟</span></span>
+    <span class="en-text">Ready to launch your game<br>to the <span class="accent">Arab world?</span></span>
+  </h2>
+  <p>
+    <span class="ar-text">انضم للاستوديوهات التي تثق بـ GameLex لتوطين ألعابها.</span>
+    <span class="en-text">Join the studios that trust GameLex for game localization.</span>
+  </p>
+  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <button class="btn-primary" style="font-size:1.05rem;padding:16px 40px;" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})">
+      <span class="ar-inline">🎮 ابدأ مجاناً</span>
+      <span class="en-inline">🎮 Start Free</span>
+    </button>
+    <button class="btn-secondary" style="font-size:1.05rem;padding:16px 40px;">
+      <span class="ar-inline">📞 تحدث مع الفريق</span>
+      <span class="en-inline">📞 Talk to the Team</span>
+    </button>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-logo">GameLex</div>
+  <div class="footer-copy">
+    © 2025 GameLex — <span class="ar-inline">هيئة الأدب والنشر والترجمة</span><span class="en-inline">Literature, Publishing & Translation Commission</span>
+  </div>
+</footer>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="modal-logo">GameLex</div>
+    <div class="modal-sub" id="modal-sub-text">سجّل دخولك لإدارة حزم التوطين</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">
+        <span class="ar-inline">دخول</span><span class="en-inline">Login</span>
+      </button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">
+        <span class="ar-inline">حساب جديد</span><span class="en-inline">Sign Up</span>
+      </button>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
+
+    <div id="login-form">
+      <div class="form-group">
+        <label class="form-label">EMAIL</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@studio.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PASSWORD</label>
+        <input class="form-input" type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="btn-auth" id="btn-login" onclick="doLogin()">
+        <span class="ar-inline">🔐 دخول</span><span class="en-inline">🔐 Login</span>
+      </button>
+    </div>
+
+    <div id="signup-form" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">STUDIO NAME</label>
+        <input class="form-input" type="text" id="signup-name" placeholder="اسم الاستوديو">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMAIL</label>
+        <input class="form-input" type="email" id="signup-email" placeholder="you@studio.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PASSWORD</label>
+        <input class="form-input" type="password" id="signup-password" placeholder="8+ أحرف">
+      </div>
+      <button class="btn-auth" id="btn-signup" onclick="doSignup()">
+        <span class="ar-inline">🚀 إنشاء حساب</span><span class="en-inline">🚀 Create Account</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ═══ SUPABASE INIT ═══
+const SUPA_URL = 'https://ntecfdtkwyijhvdilyqn.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZWNmZHRrd3lpamh2ZGlseXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTczNTIsImV4cCI6MjA5NTczMzM1Mn0.lnhooFQfkBpFM8JijWAwxFtJT4gWegq7V7KwF0lsIm4';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+
+// ═══ AUTH STATE ═══
+sb.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user || null;
+  updateNavUser();
+  if (currentUser) {
+    closeAuth();
+    loadPackages();
+  }
+});
+
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session?.user || null;
+  updateNavUser();
+  if (currentUser) loadPackages();
+}
+initAuth();
+
+function updateNavUser() {
+  const chip = document.getElementById('user-chip');
+  const loginBtn = document.getElementById('nav-login-btn');
+  if (currentUser) {
+    const email = currentUser.email || '';
+    const initial = email[0]?.toUpperCase() || '?';
+    document.getElementById('user-initial').textContent = initial;
+    document.getElementById('user-email-short').textContent = email.split('@')[0];
+    chip.style.display = 'flex';
+    if (loginBtn) loginBtn.style.display = 'none';
+  } else {
+    chip.style.display = 'none';
+    if (loginBtn) loginBtn.style.display = 'flex';
+  }
+}
+
+// ═══ AUTH MODAL ═══
+function openAuth() {
+  document.getElementById('authModal').classList.add('open');
+}
+function closeAuth() {
+  document.getElementById('authModal').classList.remove('open');
+  clearAuthMessages();
+}
+function switchTab(tab) {
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  clearAuthMessages();
+}
+function clearAuthMessages() {
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-success').style.display = 'none';
+}
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function showAuthSuccess(msg) {
+  const el = document.getElementById('auth-success');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doLogin() {
+  const btn = document.getElementById('btn-login');
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAuthError('يرجى إدخال البريد وكلمة المرور');
+  btn.disabled = true;
+  btn.textContent = '...';
+  clearAuthMessages();
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false;
+  btn.innerHTML = '<span class="ar-inline">🔐 دخول</span><span class="en-inline">🔐 Login</span>';
+  if (error) showAuthError(error.message);
+}
+
+async function doSignup() {
+  const btn = document.getElementById('btn-signup');
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  if (!name || !email || !password) return showAuthError('يرجى تعبئة جميع الحقول');
+  if (password.length < 6) return showAuthError('كلمة المرور 6 أحرف على الأقل');
+  btn.disabled = true;
+  btn.textContent = '...';
+  clearAuthMessages();
+  const { error } = await sb.auth.signUp({ email, password, options: { data: { studio_name: name } } });
+  btn.disabled = false;
+  btn.innerHTML = '<span class="ar-inline">🚀 إنشاء حساب</span><span class="en-inline">🚀 Create Account</span>';
+  if (error) showAuthError(error.message);
+  else showAuthSuccess('✓ تم إنشاء الحساب! تحقق من بريدك الإلكتروني.');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  updateNavUser();
+  // Reset packages table to demo data
+  renderDemoPackages();
+}
+
+// ═══ PACKAGES DATABASE ═══
+async function loadPackages() {
+  if (!currentUser) return;
+
+  // Create table if not exists via RPC won't work from client
+  // So we try to fetch and handle gracefully
+  const { data, error } = await sb
+    .from('packages')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    // Table may not exist yet — show setup hint
+    console.warn('Packages table not found. Create it in Supabase:', error.message);
+    showTableSetupHint();
+    return;
+  }
+
+  if (data && data.length > 0) {
+    renderPackages(data);
+  }
+}
+
+function showTableSetupHint() {
+  const notif = document.getElementById('launch-notif');
+  notif.style.display = 'block';
+  notif.style.background = 'rgba(255,214,0,0.08)';
+  notif.style.borderColor = 'var(--gold)';
+  notif.style.color = 'var(--gold)';
+  notif.innerHTML = `⚠️ &nbsp; قم بإنشاء جدول <b>packages</b> في Supabase:<br>
+  <code style="font-size:0.75rem;opacity:0.8;">id, user_id, game_name, assets_count, status, type, created_at</code>`;
+}
+
+async function savePackage(gameName, assetsCount, type) {
+  if (!currentUser) { openAuth(); return false; }
+  const { data, error } = await sb.from('packages').insert([{
+    user_id: currentUser.id,
+    game_name: gameName,
+    assets_count: assetsCount,
+    status: 'processing',
+    type: type
+  }]).select();
+  if (error) { console.error(error); return false; }
+  return data?.[0];
+}
+
+function renderPackages(pkgs) {
+  const tbody = document.getElementById('packages-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const emojis = ['🎮','⚔️','🔫','🏎️','🗡️','🧙','🌍','🚀'];
+  pkgs.forEach((pkg, i) => {
+    const statusMap = { processing: 'status-proc', done: 'status-done', review: 'status-wait', queue: 'status-wait' };
+    const labelMap = { processing: '⟳ AI', done: '✓ DONE', review: '⏳ QA', queue: '⏳ QUEUE' };
+    const pct = pkg.status === 'done' ? 100 : pkg.status === 'processing' ? 65 : 30;
+    const color = pkg.status === 'done' ? 'var(--green)' : pkg.status === 'processing' ? 'var(--cyan)' : 'var(--gold)';
+    tbody.innerHTML += `
+    <div class="table-row">
+      <div class="game-cell">
+        <span class="game-emoji">${emojis[i % emojis.length]}</span>
+        <div>
+          <div class="game-name">${pkg.game_name} <span class="saved-tag">SAVED</span></div>
+          <div class="game-sub">${pkg.type || 'AI+Human'}</div>
+        </div>
+      </div>
+      <div><div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%;background:${color};"></div></div></div>
+      <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">${pkg.assets_count || '—'}</div>
+      <div><span class="status-badge ${statusMap[pkg.status] || 'status-wait'}">${labelMap[pkg.status] || '⏳'}</span></div>
+    </div>`;
+  });
+}
+
+function renderDemoPackages() {
+  const tbody = document.getElementById('packages-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `
+  <div class="table-row">
+    <div class="game-cell"><span class="game-emoji">⚔️</span><div><div class="game-name">Starbound: Eclipse</div><div class="game-sub">AAA • Action RPG</div></div></div>
+    <div><div class="progress-mini"><div class="progress-mini-fill" style="width:100%;background:var(--green);"></div></div></div>
+    <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">342</div>
+    <div><span class="status-badge status-done">✓ DONE</span></div>
+  </div>
+  <div class="table-row">
+    <div class="game-cell"><span class="game-emoji">🔫</span><div><div class="game-name">Modern Warfare VIII</div><div class="game-sub">AAA • FPS</div></div></div>
+    <div><div class="progress-mini"><div class="progress-mini-fill" style="width:68%;background:var(--cyan);"></div></div></div>
+    <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">899</div>
+    <div><span class="status-badge status-proc">⟳ AI</span></div>
+  </div>
+  <div class="table-row">
+    <div class="game-cell"><span class="game-emoji">🏎️</span><div><div class="game-name">Desert Rush Pro</div><div class="game-sub">Indie • Racing</div></div></div>
+    <div><div class="progress-mini"><div class="progress-mini-fill" style="width:45%;background:var(--gold);"></div></div></div>
+    <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">125</div>
+    <div><span class="status-badge status-wait">⏳ QA</span></div>
+  </div>`;
+}
+
+// ═══ Language toggle
+function setLang(lang) {
+  const body = document.getElementById('body');
+  const btnAr = document.getElementById('btn-ar');
+  const btnEn = document.getElementById('btn-en');
+
+  if (lang === 'en') {
+    body.dir = 'ltr';
+    body.lang = 'en';
+    document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.en-text').forEach(el => el.style.display = 'block');
+    document.querySelectorAll('.ar-inline').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.en-inline').forEach(el => el.style.display = 'inline');
+    btnEn.classList.add('active');
+    btnAr.classList.remove('active');
+  } else {
+    body.dir = 'rtl';
+    body.lang = 'ar';
+    document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'block');
+    document.querySelectorAll('.en-text').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.ar-inline').forEach(el => el.style.display = 'inline');
+    document.querySelectorAll('.en-inline').forEach(el => el.style.display = 'none');
+    btnAr.classList.add('active');
+    btnEn.classList.remove('active');
+  }
+}
+
+// Option card select
+function selectOption(el) {
+  document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Upload simulation
+function simulateUpload(el) {
+  el.innerHTML = `<span class="upload-icon">✅</span><h3>تم الرفع!</h3><p style="color:var(--green);font-family:'Space Mono',monospace;font-size:0.8rem;">package_AR_v1.zip</p>`;
+}
+
+// Launch — save to Supabase
+async function simulateLaunch() {
+  const notif = document.getElementById('launch-notif');
+  const selectedType = document.querySelector('.option-card.selected .option-text h4')?.textContent?.trim() || 'AI+Human';
+
+  if (!currentUser) {
+    openAuth();
+    return;
+  }
+
+  notif.style.display = 'block';
+  notif.style.background = 'rgba(0,229,255,0.08)';
+  notif.style.borderColor = 'var(--cyan)';
+  notif.style.color = 'var(--cyan)';
+  notif.innerHTML = '⟳ &nbsp; جاري الحفظ في قاعدة البيانات...';
+  notif.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  const pkg = await savePackage('لعبة جديدة ' + new Date().toLocaleDateString('ar'), Math.floor(Math.random()*500)+50, selectedType);
+
+  if (pkg) {
+    notif.style.background = 'rgba(0,230,118,0.1)';
+    notif.style.borderColor = 'var(--green)';
+    notif.style.color = 'var(--green)';
+    notif.innerHTML = '✓ &nbsp; <span class="ar-inline">تم حفظ الحزمة في Supabase! ستجدها في لوحة التحكم.</span><span class="en-inline">Package saved to Supabase! Check your dashboard.</span>';
+    loadPackages();
+  } else {
+    showTableSetupHint();
+  }
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 100);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav active links
+document.querySelectorAll('.dash-nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+// Init i18n
+i18n.init('gl-lang-picker');
+</script>
+</body>
+</html>
