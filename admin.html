@@ -596,33 +596,17 @@ body {
     <div style="font-size:0.75rem;color:var(--text-dim);letter-spacing:2px;">ADMIN PORTAL</div>
   </div>
 
-  <!-- Step 1: Admin Secret -->
+  <!-- Single Password Auth -->
   <div class="auth-box" id="secret-box">
-    <h2>🛡️ كلمة سر الأدمن</h2>
-    <p>أدخل كلمة السر الخاصة بلوحة الإدارة</p>
+    <h2>🛡️ دخول الإدارة</h2>
+    <p>أدخل كلمة السر للدخول</p>
     <div class="form-group">
-      <label class="form-label">ADMIN SECRET</label>
+      <label class="form-label">ADMIN PASSWORD</label>
       <input class="form-input" type="password" id="secret-input" placeholder="••••••••"
         onkeydown="if(event.key==='Enter')checkSecret()">
     </div>
-    <button class="btn-submit" onclick="checkSecret()">تحقق ←</button>
+    <button class="btn-submit" onclick="checkSecret()">دخول ←</button>
     <div class="auth-err" id="secret-err"></div>
-  </div>
-
-  <!-- Step 2: Supabase Login (hidden until secret passes) -->
-  <div class="auth-box" id="login-box" style="display:none;">
-    <h2 data-i18n="admin_login">🔐 دخول المشرف</h2>
-    <p data-i18n="admin_only">هذه اللوحة مخصصة لفريق GameLex فقط</p>
-    <div class="form-group">
-      <label class="form-label">EMAIL</label>
-      <input class="form-input" type="email" id="a-email" placeholder="admin@gamelex.sa">
-    </div>
-    <div class="form-group">
-      <label class="form-label">PASSWORD</label>
-      <input class="form-input" type="password" id="a-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
-    </div>
-    <button class="btn-submit" id="login-btn" onclick="adminLogin()">دخول</button>
-    <div class="auth-err" id="auth-err"></div>
   </div>
 </div>
 
@@ -921,20 +905,20 @@ let allPackages = [];
 let allUsers = [];
 
 // ═══ ADMIN SECRET ═══
-let adminSecret = '';
+let adminSecret = 'Gamelex@2026';
 
 async function loadSecret() {
   const { data } = await sb.from('settings').select('value').eq('key','admin_secret').single();
-  adminSecret = data?.value || 'GameLex@2025!';
+  if (data?.value) adminSecret = data.value;
 }
 
 function checkSecret() {
   const val = document.getElementById('secret-input').value;
   const errEl = document.getElementById('secret-err');
   if (val === adminSecret) {
-    document.getElementById('secret-box').style.display = 'none';
-    document.getElementById('login-box').style.display = 'block';
     sessionStorage.setItem('gl_secret', '1');
+    document.getElementById('authScreen').style.display = 'none';
+    loadAll();
   } else {
     errEl.textContent = '✕ كلمة السر غير صحيحة';
     errEl.style.display = 'block';
@@ -960,77 +944,55 @@ async function toggleShowSecret() {
 async function updateSecret() {
   const newS = document.getElementById('new-secret').value.trim();
   const conf = document.getElementById('confirm-secret').value.trim();
-  const msgEl = document.getElementById('secret-msg');
-
   if (!newS) { showSecretMsg('⚠️ أدخل كلمة السر الجديدة', 'gold'); return; }
-  if (newS.length < 6) { showSecretMsg('⚠️ كلمة السر قصيرة جداً — 6 أحرف على الأقل', 'gold'); return; }
+  if (newS.length < 6) { showSecretMsg('⚠️ كلمة السر قصيرة جداً', 'gold'); return; }
   if (newS !== conf) { showSecretMsg('✕ كلمتا السر غير متطابقتين', 'red'); return; }
 
   const { error } = await sb.from('settings')
-    .update({ value: newS, updated_at: new Date().toISOString() })
-    .eq('key', 'admin_secret');
+    .upsert({ key:'admin_secret', value:newS, updated_at:new Date().toISOString() });
 
-  if (error) { showSecretMsg('✕ خطأ في الحفظ: ' + error.message, 'red'); return; }
+  if (error) { showSecretMsg('✕ خطأ: ' + error.message, 'red'); return; }
 
   adminSecret = newS;
-  sessionStorage.setItem('gl_secret', '1');
   document.getElementById('new-secret').value = '';
   document.getElementById('confirm-secret').value = '';
-  document.getElementById('current-secret-display').value = '••••••••';
   document.getElementById('current-secret-display').type = 'password';
+  document.getElementById('current-secret-display').value = '••••••••';
   document.getElementById('show-secret-btn').textContent = '👁 إظهار';
-  showSecretMsg('✓ تم تغيير كلمة السر بنجاح!', 'green');
+  showSecretMsg('✓ تم تغيير كلمة السر!', 'green');
   toast('✓ كلمة السر الجديدة محفوظة');
 }
 
 function showSecretMsg(txt, type) {
   const el = document.getElementById('secret-msg');
-  const colors = { green:'rgba(0,230,118,0.1)', gold:'rgba(255,214,0,0.1)', red:'rgba(255,82,82,0.1)' };
-  const borders = { green:'rgba(0,230,118,0.3)', gold:'rgba(255,214,0,0.3)', red:'rgba(255,82,82,0.3)' };
-  const textC = { green:'var(--green)', gold:'var(--gold)', red:'var(--red)' };
-  el.style.display = 'block';
-  el.style.background = colors[type];
-  el.style.border = '1px solid ' + borders[type];
-  el.style.color = textC[type];
+  const bg = { green:'rgba(0,230,118,0.1)', gold:'rgba(255,214,0,0.1)', red:'rgba(255,82,82,0.1)' };
+  const bd = { green:'rgba(0,230,118,0.3)', gold:'rgba(255,214,0,0.3)', red:'rgba(255,82,82,0.3)' };
+  const tc = { green:'var(--green)', gold:'var(--gold)', red:'var(--red)' };
+  el.style.cssText = `display:block;background:${bg[type]};border:1px solid ${bd[type]};color:${tc[type]};padding:10px 14px;border-radius:8px;font-size:0.82px;`;
   el.textContent = txt;
-  setTimeout(() => el.style.display = 'none', 4000);
+  setTimeout(()=>el.style.display='none', 4000);
 }
 
-// Check session + load secret
 async function initAdminSecret() {
   await loadSecret();
-  if (sessionStorage.getItem('gl_secret') === '1') {
-    document.getElementById('secret-box').style.display = 'none';
-    document.getElementById('login-box').style.display = 'block';
-  }
+  sessionStorage.removeItem('gl_secret');
+  setTimeout(()=>document.getElementById('secret-input')?.focus(), 300);
 }
 initAdminSecret();
 
-// ═══ AUTH ═══
-sb.auth.onAuthStateChange((event, session) => {
-  currentAdmin = session?.user || null;
-  if (currentAdmin) {
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('sb-email').textContent = currentAdmin.email?.split('@')[0] || 'admin';
-    document.getElementById('sb-initial').textContent = (currentAdmin.email?.[0] || 'A').toUpperCase();
-    loadAll();
-  } else {
-    document.getElementById('authScreen').style.display = 'flex';
-  }
-});
-
-async function adminLogin() {
-  const btn = document.getElementById('login-btn');
-  const email = document.getElementById('a-email').value.trim();
-  const pass = document.getElementById('a-pass').value;
-  const errEl = document.getElementById('auth-err');
-  errEl.style.display = 'none';
-  if (!email || !pass) { errEl.textContent = 'يرجى إدخال البريد وكلمة المرور'; errEl.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = '...';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.disabled = false; btn.textContent = 'دخول';
-  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; }
+// ═══ AUTH (data only, no login needed) ═══
+async function adminLogin() {}
+async function doLogout() {
+  sessionStorage.removeItem('gl_secret');
+  location.reload();
 }
+
+sb.auth.onAuthStateChange(() => {});
+
+// Init
+// Auth handled by secret only — no Supabase login needed
+
+// Init i18n
 
 async function doLogout() {
   await sb.auth.signOut();
@@ -1308,18 +1270,6 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
-
-// Init
-sb.auth.getSession().then(({ data: { session } }) => {
-  if (!session) document.getElementById('authScreen').style.display = 'flex';
-  else {
-    currentAdmin = session.user;
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('sb-email').textContent = currentAdmin.email?.split('@')[0] || 'admin';
-    document.getElementById('sb-initial').textContent = (currentAdmin.email?.[0] || 'A').toUpperCase();
-    loadAll();
-  }
-});
 
 // Init i18n
 i18n.init('gl-lang-picker');
