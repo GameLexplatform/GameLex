@@ -1945,7 +1945,7 @@ function selectOption(el) {
 
 // Upload simulation
 function simulateUpload(el) {
-  el.innerHTML = `<span class="upload-icon">✅</span><h3>تم الرفع!</h3><p style="color:var(--green);font-family:'Space Mono',monospace;font-size:0.8rem;">package_AR_v1.zip</p>`;
+  el.innerHTML = `<span class="upload-icon">📁</span><h3 data-i18n="drop_files">اسحب الملفات هنا</h3><p style="color:var(--text-dim);font-size:0.82rem;" data-i18n="or_click">أو اضغط للاختيار</p><div class="upload-types"><span class="type-tag">.PO</span><span class="type-tag">.XLIFF</span><span class="type-tag">.JSON</span><span class="type-tag">.CSV</span><span class="type-tag">.PNG</span><span class="type-tag">.MP3</span></div>`;
 }
 
 // Launch — save to Supabase
