@@ -631,18 +631,18 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
       </div>
     </div>
 
-    <div class="upload-zone" id="upload-zone"
-      onclick="document.getElementById('file-input').click()"
+    <label for="file-input" class="upload-zone" id="upload-zone"
       ondragover="handleDragOver(event)"
       ondragleave="handleDragLeave(event)"
-      ondrop="handleDrop(event)">
-      <input type="file" id="file-input" multiple accept=".po,.xliff,.json,.csv,.png,.mp3,.zip,.txt" style="display:none" onchange="handleFiles(this.files)">
+      ondrop="handleDrop(event)"
+      style="cursor:pointer;display:block;">
+      <input type="file" id="file-input" multiple accept=".po,.xliff,.json,.csv,.png,.mp3,.zip,.txt" style="display:none;position:absolute;" onchange="handleFiles(this.files)">
       <div id="upload-zone-content">
         <div style="font-size:2rem;margin-bottom:8px;">📁</div>
         <div style="font-size:0.9rem;margin-bottom:4px;">اسحب ملفاتك هنا أو اضغط للاختيار</div>
         <div style="font-size:0.75rem;color:var(--text-dim);">.PO .XLIFF .JSON .CSV .PNG .MP3 .ZIP</div>
       </div>
-    </div>
+    </label>
 
     <!-- File list -->
     <div id="file-list" style="display:none;margin-bottom:16px;">
