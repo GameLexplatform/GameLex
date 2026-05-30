@@ -99,9 +99,10 @@ class GameLexI18n {
   _detect() {
     const stored = localStorage.getItem('gl_lang');
     if (stored && GL_LANGS[stored]) return stored;
+    // Default always Arabic unless browser is explicitly one of supported langs
     const browser = navigator.language?.slice(0,2);
-    const map = { ar:'ar', en:'en', es:'es', pt:'pt', fr:'fr', it:'it', de:'de', ru:'ru', ko:'ko', zh:'zh', ja:'ja' };
-    return map[browser] || 'ar';
+    const supported = ['en','es','pt','fr','it','de','ru','ko','zh','ja'];
+    return supported.includes(browser) ? browser : 'ar';
   }
 
   _loadFont(lang) {
