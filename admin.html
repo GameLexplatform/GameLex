@@ -679,6 +679,9 @@ body {
     <div class="nav-item" onclick="showPage('files',this)">
       <span class="nav-icon">📁</span> <span>الملفات</span>
     </div>
+    <div class="nav-item" onclick="showPage('pricing',this)">
+      <span class="nav-icon">💰</span> <span>الأسعار</span>
+    </div>
   </div>
 
   <div class="sidebar-section">
@@ -879,6 +882,19 @@ body {
         </div>
       </div>
     </div>
+    <!-- ═══ PRICING PAGE ═══ -->
+    <div class="page" id="page-pricing">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💰 إدارة الأسعار</div>
+          <button class="card-action" onclick="loadPricingAdmin()">↻ تحديث</button>
+        </div>
+        <div style="padding:20px;" id="pricing-admin-body">
+          <div style="text-align:center;padding:30px;color:var(--text-dim);">⟳ جاري التحميل...</div>
+        </div>
+      </div>
+    </div>
+
     <div class="page" id="page-activity">
       <div class="card">
         <div class="card-header">
@@ -1475,7 +1491,8 @@ async function deleteFile(path) {
 const pageTitles = {
   overview:'📊 نظرة عامة', packages:'📦 الحزم',
   users:'👥 المستخدمون', activity:'⚡ النشاط',
-  files:'📁 الملفات', stats:'📈 الإحصائيات', settings:'⚙️ الإعدادات'
+  files:'📁 الملفات', pricing:'💰 الأسعار',
+  stats:'📈 الإحصائيات', settings:'⚙️ الإعدادات'
 };
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1484,13 +1501,160 @@ function showPage(id, el) {
   if(el) el.classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[id] || id;
   if(id === 'files') loadFiles();
+  if(id === 'pricing') loadPricingAdmin();
 }
 
 function refreshData() {
   loadAll();
   const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
   if(activePage === 'files') loadFiles();
+  if(activePage === 'pricing') loadPricingAdmin();
   toast('↻ تم تحديث البيانات');
+}
+
+// ═══ PRICING ADMIN ═══
+let pricingData = [];
+
+async function loadPricingAdmin() {
+  const body = document.getElementById('pricing-admin-body');
+  body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">⟳ جاري التحميل...</div>';
+
+  const { data, error } = await sb.from('pricing').select('*').order('sort_order');
+  if (error) { body.innerHTML = `<div style="color:var(--red);">✕ ${error.message}</div>`; return; }
+  pricingData = data || [];
+  renderPricingAdmin();
+}
+
+function renderPricingAdmin() {
+  const body = document.getElementById('pricing-admin-body');
+  if (!pricingData.length) { body.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:30px;">لا توجد خطط</div>'; return; }
+
+  body.innerHTML = pricingData.map(p => `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:0.95rem;">${p.name} ${p.is_featured ? '⭐' : ''}</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="editPlan('${p.id}')" class="action-btn">✏️ تعديل</button>
+          <button onclick="toggleFeatured('${p.id}',${!p.is_featured})" class="action-btn">${p.is_featured ? '★ مميز' : '☆ جعله مميز'}</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.85rem;">
+        <div><span style="color:var(--text-dim);font-size:0.72rem;font-family:'Space Mono',monospace;">PRICE</span><br><strong style="color:var(--green);">${p.price}</strong></div>
+        <div><span style="color:var(--text-dim);font-size:0.72rem;font-family:'Space Mono',monospace;">PERIOD</span><br>${p.period}</div>
+        <div><span style="color:var(--text-dim);font-size:0.72rem;font-family:'Space Mono',monospace;">BTN LABEL</span><br>${p.btn_label}</div>
+        <div><span style="color:var(--text-dim);font-size:0.72rem;font-family:'Space Mono',monospace;">BTN ACTION</span><br><span style="font-size:0.75rem;color:var(--cyan);">${p.btn_action}</span></div>
+      </div>
+      <div style="margin-top:12px;">
+        <span style="color:var(--text-dim);font-size:0.72rem;font-family:'Space Mono',monospace;">FEATURES</span>
+        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+          ${(Array.isArray(p.features) ? p.features : JSON.parse(p.features||'[]')).map(f =>
+            `<span style="background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);border-radius:6px;padding:3px 8px;font-size:0.75rem;">${f}</span>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('') + `
+    <div style="margin-top:8px;" id="edit-plan-area"></div>`;
+}
+
+function editPlan(id) {
+  const p = pricingData.find(x => x.id === id);
+  if (!p) return;
+  const features = Array.isArray(p.features) ? p.features : JSON.parse(p.features||'[]');
+  const area = document.getElementById('edit-plan-area');
+  area.innerHTML = `
+    <div style="background:var(--surface3);border:1px solid var(--green);border-radius:12px;padding:20px;margin-top:8px;">
+      <div style="font-weight:700;margin-bottom:16px;color:var(--green);">✏️ تعديل: ${p.name}</div>
+      <div class="form-group"><label class="form-label">PRICE</label>
+        <input class="form-input" id="ep-price" value="${p.price}"></div>
+      <div class="form-group"><label class="form-label">PERIOD</label>
+        <input class="form-input" id="ep-period" value="${p.period}"></div>
+      <div class="form-group"><label class="form-label">BTN LABEL</label>
+        <input class="form-input" id="ep-btn" value="${p.btn_label}"></div>
+      <div class="form-group"><label class="form-label">BTN ACTION — نوع التواصل</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;margin-bottom:12px;">
+          <div onclick="setContactType('page','${p.btn_action}')" id="ct-page"
+            style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;
+            padding:10px;text-align:center;cursor:pointer;font-size:0.82rem;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='var(--green)'" onmouseout="updateContactStyle()">
+            📄 صفحة<br><span style="font-size:0.68rem;color:var(--text-dim);">client.html</span>
+          </div>
+          <div onclick="setContactType('whatsapp','${p.btn_action}')" id="ct-whatsapp"
+            style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;
+            padding:10px;text-align:center;cursor:pointer;font-size:0.82rem;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='var(--green)'" onmouseout="updateContactStyle()">
+            💬 واتساب<br><span style="font-size:0.68rem;color:var(--text-dim);">wa.me/...</span>
+          </div>
+          <div onclick="setContactType('email','${p.btn_action}')" id="ct-email"
+            style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;
+            padding:10px;text-align:center;cursor:pointer;font-size:0.82rem;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='var(--green)'" onmouseout="updateContactStyle()">
+            ✉️ إيميل<br><span style="font-size:0.68rem;color:var(--text-dim);">mailto:...</span>
+          </div>
+        </div>
+        <div id="ct-page-input">
+          <input class="form-input" id="ep-action" value="${p.btn_action}" style="direction:ltr;" placeholder="client.html">
+        </div>
+        <div id="ct-whatsapp-input" style="display:none;">
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">رقم الواتساب (مع كود الدولة بدون +)</div>
+          <input class="form-input" id="ep-wa" placeholder="966501234567" style="direction:ltr;">
+        </div>
+        <div id="ct-email-input" style="display:none;">
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">البريد الإلكتروني</div>
+          <input class="form-input" id="ep-email" placeholder="hello@gamelex.sa" style="direction:ltr;">
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">FEATURES (سطر لكل ميزة)</label>
+        <textarea class="form-input" id="ep-features" rows="6" style="resize:vertical;">${features.join('\n')}</textarea></div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn-submit" onclick="savePlan('${id}')" style="flex:1;">💾 حفظ</button>
+        <button class="btn-submit" onclick="document.getElementById('edit-plan-area').innerHTML=''" style="background:var(--surface2);color:var(--text);">إلغاء</button>
+      </div>
+      <div id="ep-msg" style="margin-top:10px;display:none;"></div>
+    </div>`;
+  area.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+async function savePlan(id) {
+  const price   = document.getElementById('ep-price').value.trim();
+  const period  = document.getElementById('ep-period').value.trim();
+  const btnLabel= document.getElementById('ep-btn').value.trim();
+  const features= document.getElementById('ep-features').value.split('\n').map(f=>f.trim()).filter(Boolean);
+  const msgEl   = document.getElementById('ep-msg');
+
+  // Get btn_action based on contact type
+  let btnAct = '';
+  const waInput = document.getElementById('ep-wa');
+  const emailInput = document.getElementById('ep-email');
+  const pageInput = document.getElementById('ep-action');
+  if (waInput && document.getElementById('ct-whatsapp-input')?.style.display !== 'none') {
+    btnAct = `https://wa.me/${waInput.value.trim()}`;
+  } else if (emailInput && document.getElementById('ct-email-input')?.style.display !== 'none') {
+    btnAct = `mailto:${emailInput.value.trim()}`;
+  } else {
+    btnAct = pageInput?.value.trim() || 'client.html';
+  }
+
+  const { error } = await sb.from('pricing').update({
+    price, period, btn_label: btnLabel, btn_action: btnAct,
+    features: JSON.stringify(features), updated_at: new Date().toISOString()
+  }).eq('id', id);
+
+  if (error) {
+    msgEl.style.cssText = 'display:block;color:var(--red);font-size:0.82rem;';
+    msgEl.textContent = '✕ ' + error.message;
+  } else {
+    toast('✓ تم حفظ التغييرات!');
+    document.getElementById('edit-plan-area').innerHTML = '';
+    await loadPricingAdmin();
+  }
+}
+
+async function toggleFeatured(id, val) {
+  await sb.from('pricing').update({ is_featured: val }).eq('id', id);
+  if (val) await sb.from('pricing').update({ is_featured: false }).neq('id', id);
+  await loadPricingAdmin();
+  toast(val ? '⭐ تم تحديد الخطة المميزة' : '☆ تم إلغاء التمييز');
 }
 
 // ═══ HELPERS ═══
@@ -1524,11 +1688,14 @@ async function viewPkgFiles(pkgId, gameName) {
   modal.classList.add('open');
 
   // Get user_id from DB directly to make sure it's correct
-  const { data: pkgData } = await sb.from('packages').select('user_id').eq('id', pkgId).single();
+  const { data: pkgData, error: pkgErr } = await sb.from('packages').select('user_id').eq('id', pkgId).single();
   const userId = pkgData?.user_id;
 
   if (!userId) {
-    body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--red);">✕ ما وجدنا بيانات الحزمة</div>';
+    body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--red);">
+      ✕ ما وجدنا الحزمة<br>
+      <small style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;">${pkgErr?.message || 'unknown error'}</small>
+    </div>`;
     return;
   }
 
@@ -1536,7 +1703,11 @@ async function viewPkgFiles(pkgId, gameName) {
   const { data: files, error } = await sb.storage.from('packages').list(folderPath, { limit: 100 });
 
   if (error) {
-    body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--red);">✕ خطأ: ${error.message}</div>`;
+    body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--red);">
+      ✕ خطأ في تحميل الملفات<br>
+      <small style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;">${error.message}</small><br>
+      <small style="font-size:0.68rem;color:var(--text-dim);">path: ${folderPath}</small>
+    </div>`;
     return;
   }
 
