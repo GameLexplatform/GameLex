@@ -1356,12 +1356,13 @@ function filterFiles() {
 }
 
 async function downloadFile(path, name) {
-  const { data, error } = await sb.storage.from('packages').download(path);
-  if (error) { toast('✕ خطأ في التحميل'); return; }
-  const url = URL.createObjectURL(data);
+  const { data } = sb.storage.from('packages').getPublicUrl(path);
+  if (!data?.publicUrl) { toast('✕ ما قدرنا نجيب رابط الملف'); return; }
   const a = document.createElement('a');
-  a.href = url; a.download = name; a.click();
-  URL.revokeObjectURL(url);
+  a.href = data.publicUrl;
+  a.download = name;
+  a.target = '_blank';
+  a.click();
   toast('✓ جاري التحميل: ' + name);
 }
 
