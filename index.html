@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GameLex — منصة توطين الألعاب</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
-<script src="i18n.js"></script>
+<!-- i18n loaded at bottom -->
 <style>
   :root {
     --bg: #030b12;
@@ -734,7 +734,7 @@
   }
   .table-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
     padding: 14px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     font-size: 0.85rem;
@@ -1499,71 +1499,10 @@
           </div>
         </div>
 
-        <div class="dash-table">
-          <div class="table-head">
-            <span><span class="ar-inline">اللعبة</span><span class="en-inline">Game</span></span>
-            <span><span class="ar-inline">التقدم</span><span class="en-inline">Progress</span></span>
-            <span><span class="ar-inline">الأصول</span><span class="en-inline">Assets</span></span>
-            <span><span class="ar-inline">الحالة</span><span class="en-inline">Status</span></span>
-          </div>
+        <div class="dash-table" id="showcase-table">
           <div id="packages-tbody">
-          <div class="table-row">
-            <div class="game-cell">
-              <span class="game-emoji">⚔️</span>
-              <div>
-                <div class="game-name">Starbound: Eclipse</div>
-                <div class="game-sub">AAA • Action RPG</div>
-              </div>
-            </div>
-            <div>
-              <div class="progress-mini"><div class="progress-mini-fill" style="width:100%;background:var(--green);"></div></div>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">342</div>
-            <div><span class="status-badge status-done">✓ DONE</span></div>
+            <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:0.85rem;">⟳ جاري التحميل...</div>
           </div>
-          <div class="table-row">
-            <div class="game-cell">
-              <span class="game-emoji">🔫</span>
-              <div>
-                <div class="game-name">Modern Warfare VIII</div>
-                <div class="game-sub">AAA • FPS</div>
-              </div>
-            </div>
-            <div>
-              <div class="progress-mini"><div class="progress-mini-fill" style="width:68%;background:var(--cyan);"></div></div>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">899</div>
-            <div><span class="status-badge status-proc">⟳ AI</span></div>
-          </div>
-          <div class="table-row">
-            <div class="game-cell">
-              <span class="game-emoji">🏎️</span>
-              <div>
-                <div class="game-name">Desert Rush Pro</div>
-                <div class="game-sub">Indie • Racing</div>
-              </div>
-            </div>
-            <div>
-              <div class="progress-mini"><div class="progress-mini-fill" style="width:45%;background:var(--gold);"></div></div>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">125</div>
-            <div><span class="status-badge status-wait">⏳ QA</span></div>
-          </div>
-          <div class="table-row">
-            <div class="game-cell">
-              <span class="game-emoji">🗡️</span>
-              <div>
-                <div class="game-name">Neon Citadel</div>
-                <div class="game-sub">Indie • Strategy</div>
-              </div>
-            </div>
-            <div>
-              <div class="progress-mini"><div class="progress-mini-fill" style="width:12%;background:rgba(0,230,118,0.4);"></div></div>
-            </div>
-            <div style="font-family:'Space Mono',monospace;font-size:0.8rem;">67</div>
-            <div><span class="status-badge status-wait">⏳ QUEUE</span></div>
-          </div>
-          </div><!-- end packages-tbody -->
         </div>
       </div>
     </div>
@@ -1664,6 +1603,7 @@
   </div>
 </div>
 
+<script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ═══ SUPABASE INIT ═══
@@ -2045,6 +1985,45 @@ function getStaticPricing() {
     <button class="btn-secondary" style="width:100%;" onclick="window.location.href='mailto:hello@gamelex.sa'" data-i18n="contact_us">تواصل معنا</button>
   </div>`;
 }
+
+// ═══ SHOWCASE GAMES ═══
+async function loadShowcase() {
+  const tbody = document.getElementById('packages-tbody');
+  if (!tbody) return;
+
+  const { data, error } = await sb
+    .from('showcase_games')
+    .select('*')
+    .eq('is_visible', true)
+    .order('sort_order');
+
+  if (error || !data || !data.length) {
+    tbody.innerHTML = `
+      <div class="table-row" style="grid-template-columns:1fr;">
+        <div class="game-cell"><span class="game-emoji">⚔️</span><div><div class="game-name">Starbound: Eclipse</div><div class="game-sub">AAA • Action RPG</div></div></div>
+      </div>
+      <div class="table-row" style="grid-template-columns:1fr;">
+        <div class="game-cell"><span class="game-emoji">🔫</span><div><div class="game-name">Modern Warfare VIII</div><div class="game-sub">AAA • FPS</div></div></div>
+      </div>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(g => `
+    <div class="table-row" style="grid-template-columns:1fr;">
+      <div class="game-cell">
+        ${g.logo_url
+          ? `<img src="${g.logo_url}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='<span class=\'game-emoji\'>${g.emoji||'🎮'}</span>'">`
+          : `<span class="game-emoji">${g.emoji || '🎮'}</span>`
+        }
+        <div>
+          <div class="game-name">${g.name}</div>
+          ${g.category ? `<div class="game-sub">${g.category}</div>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+loadShowcase();
 
 // Load pricing on page load
 loadPricing();

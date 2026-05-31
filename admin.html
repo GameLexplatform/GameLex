@@ -682,6 +682,9 @@ body {
     <div class="nav-item" onclick="showPage('pricing',this)">
       <span class="nav-icon">💰</span> <span>الأسعار</span>
     </div>
+    <div class="nav-item" onclick="showPage('showcase',this)">
+      <span class="nav-icon">🎮</span> <span>ألعاب الواجهة</span>
+    </div>
   </div>
 
   <div class="sidebar-section">
@@ -882,6 +885,39 @@ body {
         </div>
       </div>
     </div>
+    <!-- ═══ SHOWCASE PAGE ═══ -->
+    <div class="page" id="page-showcase">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header">
+          <div class="card-title">🎮 إضافة لعبة جديدة</div>
+        </div>
+        <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="showcase-add-form">
+          <div><label class="form-label">اسم اللعبة</label>
+            <input class="form-input" id="sg-name" placeholder="Modern Warfare IX" style="direction:auto;"></div>
+          <div><label class="form-label">الفئة</label>
+            <input class="form-input" id="sg-cat" placeholder="AAA • FPS" style="direction:auto;"></div>
+          <div><label class="form-label">إيموجي</label>
+            <input class="form-input" id="sg-emoji" placeholder="🎮" style="text-align:center;font-size:1.3rem;"></div>
+          <div><label class="form-label">رابط اللوغو (اختياري)</label>
+            <input class="form-input" id="sg-logo" placeholder="https://..." style="direction:ltr;"></div>
+          <div style="grid-column:span 2;">
+            <button class="btn-submit" onclick="addShowcaseGame()" style="width:100%;">+ إضافة</button>
+            <div id="sg-msg" style="margin-top:8px;display:none;font-size:0.82rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎮 ألعاب الواجهة الرئيسية</div>
+          <button class="card-action" onclick="loadShowcaseAdmin()">↻ تحديث</button>
+        </div>
+        <div style="padding:20px;" id="showcase-admin-body">
+          <div style="text-align:center;padding:20px;color:var(--text-dim);">⟳ جاري التحميل...</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ PRICING PAGE ═══ -->
     <div class="page" id="page-pricing">
       <div class="card">
@@ -1492,6 +1528,7 @@ const pageTitles = {
   overview:'📊 نظرة عامة', packages:'📦 الحزم',
   users:'👥 المستخدمون', activity:'⚡ النشاط',
   files:'📁 الملفات', pricing:'💰 الأسعار',
+  showcase:'🎮 ألعاب الواجهة',
   stats:'📈 الإحصائيات', settings:'⚙️ الإعدادات'
 };
 function showPage(id, el) {
@@ -1502,6 +1539,7 @@ function showPage(id, el) {
   document.getElementById('page-title').textContent = pageTitles[id] || id;
   if(id === 'files') loadFiles();
   if(id === 'pricing') loadPricingAdmin();
+  if(id === 'showcase') loadShowcaseAdmin();
 }
 
 function refreshData() {
@@ -1509,7 +1547,102 @@ function refreshData() {
   const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
   if(activePage === 'files') loadFiles();
   if(activePage === 'pricing') loadPricingAdmin();
+  if(activePage === 'showcase') loadShowcaseAdmin();
   toast('↻ تم تحديث البيانات');
+}
+
+// ═══ SHOWCASE ADMIN ═══
+async function loadShowcaseAdmin() {
+  const body = document.getElementById('showcase-admin-body');
+  if (!body) return;
+  body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">⟳</div>';
+
+  const { data, error } = await sb.from('showcase_games').select('*').order('sort_order');
+  if (error) { body.innerHTML = `<div style="color:var(--red);">✕ ${error.message}</div>`; return; }
+  if (!data?.length) { body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">لا توجد ألعاب</div>'; return; }
+
+  body.innerHTML = data.map(g => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:10px;padding:14px 16px;margin-bottom:10px;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        ${g.logo_url
+          ? `<img src="${g.logo_url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='<span style=font-size:1.8rem>${g.emoji||'🎮'}</span>'">`
+          : `<span style="font-size:1.8rem;flex-shrink:0;">${g.emoji||'🎮'}</span>`
+        }
+        <div style="min-width:0;">
+          <div style="font-weight:600;font-size:0.9rem;">${g.name}</div>
+          <div style="font-size:0.75rem;color:var(--text-dim);">${g.category||'—'}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <div onclick="toggleShowcaseVisible('${g.id}',${!g.is_visible})"
+          style="cursor:pointer;font-size:0.8rem;padding:4px 10px;border-radius:6px;
+          background:${g.is_visible ? 'rgba(0,230,118,0.1)' : 'rgba(255,255,255,0.06)'};
+          color:${g.is_visible ? 'var(--green)' : 'var(--text-dim)'};
+          border:1px solid ${g.is_visible ? 'rgba(0,230,118,0.3)' : 'var(--border2)'};
+          transition:all 0.2s;">
+          ${g.is_visible ? '👁 ظاهر' : '🙈 مخفي'}
+        </div>
+        <button onclick="editShowcaseGame('${g.id}')" class="action-btn">✏️</button>
+        <button onclick="deleteShowcaseGame('${g.id}')" class="action-btn danger">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addShowcaseGame() {
+  const name  = document.getElementById('sg-name').value.trim();
+  const cat   = document.getElementById('sg-cat').value.trim();
+  const emoji = document.getElementById('sg-emoji').value.trim() || '🎮';
+  const logo  = document.getElementById('sg-logo').value.trim();
+  const msgEl = document.getElementById('sg-msg');
+  if (!name) { msgEl.style.cssText='display:block;color:var(--red);'; msgEl.textContent='⚠️ أدخل اسم اللعبة'; return; }
+
+  const { error } = await sb.from('showcase_games').insert([{
+    name, category: cat||null, emoji, logo_url: logo||null
+  }]);
+
+  if (error) { msgEl.style.cssText='display:block;color:var(--red);'; msgEl.textContent='✕ '+error.message; return; }
+
+  msgEl.style.cssText='display:block;color:var(--green);font-family:Space Mono,monospace;';
+  msgEl.textContent='✓ تمت الإضافة!';
+  document.getElementById('sg-name').value='';
+  document.getElementById('sg-cat').value='';
+  document.getElementById('sg-emoji').value='';
+  document.getElementById('sg-logo').value='';
+  setTimeout(()=>msgEl.style.display='none', 2000);
+  loadShowcaseAdmin();
+  toast('✓ تمت إضافة اللعبة');
+}
+
+async function toggleShowcaseVisible(id, val) {
+  await sb.from('showcase_games').update({ is_visible: val }).eq('id', id);
+  loadShowcaseAdmin();
+  toast(val ? '👁 تم إظهار اللعبة' : '🙈 تم إخفاء اللعبة');
+}
+
+async function editShowcaseGame(id) {
+  const { data } = await sb.from('showcase_games').select('*').eq('id', id).single();
+  if (!data) return;
+  const newName  = prompt('اسم اللعبة:', data.name);
+  if (!newName) return;
+  const newCat   = prompt('الفئة:', data.category||'');
+  const newEmoji = prompt('إيموجي:', data.emoji||'🎮');
+  const newLogo  = prompt('رابط اللوغو (اتركه فارغ لحذفه):', data.logo_url||'');
+
+  await sb.from('showcase_games').update({
+    name: newName, category: newCat||null,
+    emoji: newEmoji||'🎮', logo_url: newLogo||null
+  }).eq('id', id);
+  loadShowcaseAdmin();
+  toast('✓ تم التحديث');
+}
+
+async function deleteShowcaseGame(id) {
+  if (!confirm('حذف هذه اللعبة من الواجهة؟')) return;
+  await sb.from('showcase_games').delete().eq('id', id);
+  loadShowcaseAdmin();
+  toast('🗑 تم الحذف');
 }
 
 // ═══ PRICING ADMIN ═══
@@ -1613,6 +1746,8 @@ function editPlan(id) {
       <div id="ep-msg" style="margin-top:10px;display:none;"></div>
     </div>`;
   area.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  // Auto-detect contact type
+  setTimeout(() => autoDetectContactType(p.btn_action), 50);
 }
 
 async function savePlan(id) {
@@ -1648,6 +1783,63 @@ async function savePlan(id) {
     document.getElementById('edit-plan-area').innerHTML = '';
     await loadPricingAdmin();
   }
+}
+
+function setContactType(type, currentVal) {
+  // Hide all inputs
+  ['page','whatsapp','email'].forEach(t => {
+    const inp = document.getElementById(`ct-${t}-input`);
+    if (inp) inp.style.display = 'none';
+  });
+  // Show selected
+  const target = document.getElementById(`ct-${type}-input`);
+  if (target) target.style.display = 'block';
+
+  // Pre-fill if current value matches
+  if (type === 'whatsapp' && currentVal?.includes('wa.me')) {
+    const num = currentVal.replace('https://wa.me/','').replace('http://wa.me/','');
+    const el = document.getElementById('ep-wa');
+    if (el) el.value = num;
+  }
+  if (type === 'email' && currentVal?.includes('mailto:')) {
+    const em = currentVal.replace('mailto:','');
+    const el = document.getElementById('ep-email');
+    if (el) el.value = em;
+  }
+  if (type === 'page') {
+    const el = document.getElementById('ep-action');
+    if (el && !currentVal?.includes('wa.me') && !currentVal?.includes('mailto:')) {
+      el.value = currentVal || 'client.html';
+    } else if (el) {
+      el.value = 'client.html';
+    }
+  }
+
+  updateContactStyle(type);
+}
+
+function updateContactStyle(activeType) {
+  ['page','whatsapp','email'].forEach(t => {
+    const el = document.getElementById(`ct-${t}`);
+    if (!el) return;
+    if (t === activeType) {
+      el.style.borderColor = 'var(--green)';
+      el.style.background = 'rgba(0,230,118,0.08)';
+      el.style.color = 'var(--green)';
+    } else {
+      el.style.borderColor = 'var(--border2)';
+      el.style.background = 'var(--surface)';
+      el.style.color = 'var(--text)';
+    }
+  });
+}
+
+// Auto-detect type when edit opens
+function autoDetectContactType(val) {
+  if (!val) return;
+  if (val.includes('wa.me')) setContactType('whatsapp', val);
+  else if (val.includes('mailto:')) setContactType('email', val);
+  else setContactType('page', val);
 }
 
 async function toggleFeatured(id, val) {
