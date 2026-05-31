@@ -1078,6 +1078,18 @@ function getMockUsers() {
 }
 
 // ═══ RENDER ═══
+function cleanType(t) {
+  if (!t) return '—';
+  return t.replace('AI + مراجعة بشريةAI + Human Review', 'AI + بشري')
+          .replace('AI+Human', 'AI + بشري')
+          .replace('AI سريعFast AI Only', 'AI سريع')
+          .replace('Fast AI Only', 'AI سريع')
+          .replace('Fast AI', 'AI سريع')
+          .replace('مراجعة إضافيةPremium', 'بريميوم')
+          .replace('Premium', 'بريميوم')
+          .trim();
+}
+
 const statusConfig = {
   done:       { label:'✓ DONE',       cls:'badge-green' },
   processing: { label:'⟳ PROCESSING', cls:'badge-cyan' },
@@ -1091,9 +1103,9 @@ function pkgRow(pkg, cols) {
   const emojis = { done:'⚔️', processing:'🔫', review:'🏎️', queue:'🗡️' };
   const em = emojis[pkg.status] || '🎮';
   let html = `<tr data-id="${pkg.id}">`;
-  if (cols.includes('game'))  html += `<td><div style="display:flex;align-items:center;gap:8px;"><span>${em}</span><div><div style="font-weight:600;">${pkg.game_name}</div><div style="font-size:0.7rem;color:var(--text-dim);">${pkg.type || '—'}</div></div></div></td>`;
+  if (cols.includes('game'))  html += `<td><div style="display:flex;align-items:center;gap:8px;"><span>${em}</span><div><div style="font-weight:600;">${pkg.game_name}</div><div style="font-size:0.7rem;color:var(--text-dim);">${cleanType(pkg.type)}</div></div></div></td>`;
   if (cols.includes('user'))  html += `<td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--text-dim);">${(pkg.user_id||'').slice(0,8)}...</td>`;
-  if (cols.includes('type'))  html += `<td><span class="badge badge-dim">${pkg.type||'—'}</span></td>`;
+  if (cols.includes('type'))  html += `<td><span class="badge badge-dim">${cleanType(pkg.type)}</span></td>`;
   if (cols.includes('assets'))html += `<td style="font-family:'Space Mono',monospace;">${pkg.assets_count||'—'}</td>`;
   if (cols.includes('status'))html += `<td><select class="status-select" onchange="updateStatus('${pkg.id}',this.value)"><option value="queue" ${pkg.status==='queue'?'selected':''}>◷ QUEUE</option><option value="processing" ${pkg.status==='processing'?'selected':''}>⟳ PROCESSING</option><option value="review" ${pkg.status==='review'?'selected':''}>⏳ REVIEW</option><option value="done" ${pkg.status==='done'?'selected':''}>✓ DONE</option></select></td>`;
   if (cols.includes('date'))  html += `<td style="font-size:0.78rem;color:var(--text-dim);">${date}</td>`;
@@ -1275,33 +1287,44 @@ async function loadFiles() {
   if (!tbody) return;
   tbody.innerHTML = '<tr class="loading-row"><td colspan="6">⟳ جاري التحميل...</td></tr>';
 
-  const { data, error } = await sb.storage.from('packages').list('', {
-    limit: 200, sortBy: { column: 'created_at', order: 'desc' }
-  });
+  allFiles = [];
 
-  if (error || !data) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="6">✕ خطأ في تحميل الملفات</td></tr>';
+  // Get all packages from DB to map pkg_id to game names
+  const { data: pkgs } = await sb.from('packages').select('id, game_name, user_id');
+  const pkgMap = {};
+  (pkgs||[]).forEach(p => pkgMap[p.id] = p.game_name);
+
+  // List root folders (user_ids)
+  const { data: userFolders, error } = await sb.storage.from('packages').list('', { limit: 100 });
+
+  if (error) {
+    tbody.innerHTML = `<tr class="loading-row"><td colspan="6">✕ ${error.message}</td></tr>`;
     return;
   }
 
-  // List is flat folders (user_id) — need to recurse
-  allFiles = [];
-  for (const folder of data) {
-    if (folder.id) continue; // it's a file not a folder
-    // Get packages inside user folder
-    const { data: pkgFolders } = await sb.storage.from('packages').list(folder.name);
-    if (!pkgFolders) continue;
-    for (const pkgFolder of pkgFolders) {
-      if (pkgFolder.id) continue;
-      const { data: files } = await sb.storage.from('packages').list(`${folder.name}/${pkgFolder.name}`);
-      if (!files) continue;
-      for (const file of files) {
-        if (!file.id) continue;
+  for (const userFolder of (userFolders||[])) {
+    if (userFolder.id) {
+      // It's a direct file
+      allFiles.push({ name: userFolder.name, path: userFolder.name, user_id:'—', pkg_id:'—', size: userFolder.metadata?.size||0, created_at: userFolder.created_at });
+      continue;
+    }
+    // It's a folder — list pkg folders inside
+    const { data: pkgFolders } = await sb.storage.from('packages').list(userFolder.name, { limit: 100 });
+    for (const pkgFolder of (pkgFolders||[])) {
+      if (pkgFolder.id) {
+        allFiles.push({ name: pkgFolder.name, path: `${userFolder.name}/${pkgFolder.name}`, user_id: userFolder.name, pkg_id:'—', size: pkgFolder.metadata?.size||0, created_at: pkgFolder.created_at });
+        continue;
+      }
+      // List actual files
+      const { data: files } = await sb.storage.from('packages').list(`${userFolder.name}/${pkgFolder.name}`, { limit: 100 });
+      for (const file of (files||[])) {
+        if (!file.id && !file.name) continue;
         allFiles.push({
           name: file.name,
-          path: `${folder.name}/${pkgFolder.name}/${file.name}`,
-          user_id: folder.name,
+          path: `${userFolder.name}/${pkgFolder.name}/${file.name}`,
+          user_id: userFolder.name,
           pkg_id: pkgFolder.name,
+          game_name: pkgMap[pkgFolder.name] || pkgFolder.name.slice(0,8)+'...',
           size: file.metadata?.size || 0,
           created_at: file.created_at || file.metadata?.lastModified
         });
