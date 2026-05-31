@@ -578,7 +578,7 @@ body {
 @media(max-width:900px){
   .sidebar { display:none; }
   .sidebar.mobile-open {
-    display:flex; z-index:100;
+    display:flex !important; z-index:100;
     position:fixed; top:0; right:0; bottom:0;
     box-shadow:-4px 0 24px rgba(0,0,0,0.5);
   }
@@ -1948,8 +1948,10 @@ function viewPkg(id) {
 
 // Mobile sidebar
 function toggleSidebar() {
-  document.querySelector('.sidebar').classList.toggle('mobile-open');
-  document.getElementById('mobOverlay').classList.toggle('open');
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('mobOverlay');
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('open');
 }
 
 window.addEventListener('load', () => {
