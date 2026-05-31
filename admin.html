@@ -989,7 +989,10 @@ function checkSecret() {
   const errEl = document.getElementById('secret-err');
   if (val === adminSecret) {
     sessionStorage.setItem('gl_secret', '1');
+    // Hide auth, show app
     document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('app-sidebar').classList.remove('sidebar-hidden');
+    document.getElementById('app-main').classList.remove('main-hidden');
     loadAll();
   } else {
     errEl.textContent = '✕ كلمة السر غير صحيحة';
@@ -1056,7 +1059,10 @@ initAdminSecret();
 async function adminLogin() {}
 async function doLogout() {
   sessionStorage.removeItem('gl_secret');
-  location.reload();
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('app-sidebar').classList.add('sidebar-hidden');
+  document.getElementById('app-main').classList.add('main-hidden');
+  document.getElementById('secret-input').value = '';
 }
 
 sb.auth.onAuthStateChange(() => {});
