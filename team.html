@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameLex — بوابة الفريق</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #030b12;
+  --surface: #071520;
+  --surface2: #0c1f2e;
+  --surface3: #112436;
+  --green: #00e676;
+  --cyan: #00e5ff;
+  --gold: #ffd600;
+  --red: #ff5252;
+  --purple: #ce93d8;
+  --text: #e8f4f8;
+  --text-dim: #7b9aaa;
+  --border: rgba(0,230,118,0.12);
+  --border2: rgba(255,255,255,0.06);
+  --glow: 0 0 40px rgba(0,230,118,0.12);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:var(--bg); color:var(--text);
+  font-family:'Tajawal',sans-serif; min-height:100vh;
+  background-image: linear-gradient(rgba(0,230,118,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,230,118,0.02) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ─── AUTH ─── */
+.auth-screen {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:var(--bg); display:flex; align-items:center;
+  justify-content:center; z-index:9999; flex-direction:column; gap:24px;
+  background-image: linear-gradient(rgba(0,230,118,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,230,118,0.025) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.auth-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:40px 36px;
+  width:400px; max-width:95vw; box-shadow:var(--glow);
+}
+.auth-logo {
+  text-align:center; font-family:'Space Mono',monospace;
+  font-size:1.6rem; font-weight:700; color:var(--green);
+  text-shadow:0 0 24px rgba(0,230,118,0.4); margin-bottom:4px;
+}
+.auth-sub {
+  text-align:center; color:var(--text-dim);
+  font-size:0.82rem; margin-bottom:28px;
+}
+.auth-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(206,147,216,0.1); border:1px solid rgba(206,147,216,0.3);
+  color:var(--purple); border-radius:100px; padding:4px 14px;
+  font-size:0.75rem; margin-bottom:20px;
+}
+
+/* ─── FORM ─── */
+.form-group { margin-bottom:16px; }
+.form-label {
+  display:block; font-size:0.72rem; color:var(--text-dim);
+  margin-bottom:6px; font-family:'Space Mono',monospace; letter-spacing:0.5px;
+}
+.form-input {
+  width:100%; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:9px; padding:11px 14px; color:var(--text);
+  font-size:0.9rem; font-family:'Tajawal',sans-serif;
+  outline:none; transition:border-color 0.2s; direction:ltr;
+}
+.form-input:focus { border-color:var(--green); }
+.form-input::placeholder { color:var(--text-dim); }
+.btn-submit {
+  width:100%; background:var(--green); color:#000; border:none;
+  padding:13px; border-radius:9px; font-size:1rem; font-weight:700;
+  font-family:'Tajawal',sans-serif; cursor:pointer; transition:all 0.2s;
+}
+.btn-submit:hover { box-shadow:0 6px 24px rgba(0,230,118,0.3); transform:translateY(-1px); }
+.btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.auth-msg {
+  margin-top:12px; padding:10px 14px; border-radius:8px; font-size:0.8rem;
+  display:none;
+}
+.auth-msg.err { background:rgba(255,82,82,0.1); border:1px solid rgba(255,82,82,0.3); color:var(--red); }
+.auth-msg.ok  { background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.3); color:var(--green); }
+
+/* ─── APP ─── */
+.app { display:none; flex-direction:column; min-height:100vh; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  position:sticky; top:0; z-index:50;
+  background:rgba(3,11,18,0.92); backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.topbar-logo {
+  font-family:'Space Mono',monospace; font-weight:700;
+  font-size:1.2rem; color:var(--green);
+}
+.member-chip {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:100px; padding:5px 14px 5px 8px; font-size:0.82rem;
+}
+.member-av {
+  width:26px; height:26px; border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.72rem; font-weight:700; color:#000;
+}
+.logout-btn {
+  background:none; border:1px solid var(--border2); color:var(--text-dim);
+  padding:6px 12px; border-radius:7px; font-size:0.78rem; cursor:pointer;
+  transition:all 0.2s; font-family:'Tajawal',sans-serif;
+}
+.logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* ─── CONTENT ─── */
+.content { padding:28px 24px; max-width:900px; margin:0 auto; width:100%; }
+
+/* ─── STATS ─── */
+.stats-row {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:14px; margin-bottom:28px;
+}
+.stat-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:13px; padding:18px 20px; transition:all 0.2s;
+}
+.stat-label { font-size:0.68rem; color:var(--text-dim); font-family:'Space Mono',monospace; letter-spacing:1px; margin-bottom:8px; }
+.stat-val { font-family:'Space Mono',monospace; font-size:1.6rem; font-weight:700; line-height:1; }
+.stat-sub { font-size:0.72rem; color:var(--text-dim); margin-top:5px; }
+
+/* ─── TABS ─── */
+.tabs {
+  display:flex; background:var(--surface2); border-radius:10px;
+  padding:4px; gap:4px; margin-bottom:24px;
+}
+.tab {
+  flex:1; padding:9px; text-align:center; border-radius:7px;
+  cursor:pointer; font-size:0.88rem; font-weight:600;
+  color:var(--text-dim); border:none; background:transparent;
+  font-family:'Tajawal',sans-serif; transition:all 0.2s;
+}
+.tab.active { background:var(--surface3); color:var(--text); border:1px solid var(--border); }
+
+/* ─── TASK CARD ─── */
+.task-list { display:flex; flex-direction:column; gap:14px; }
+.task-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:14px; padding:20px;
+  transition:all 0.25s; cursor:pointer;
+  position:relative; overflow:hidden;
+}
+.task-card:hover { border-color:rgba(0,230,118,0.25); transform:translateY(-2px); }
+.task-card::before {
+  content:''; position:absolute; top:0; right:0; bottom:0; width:3px;
+  border-radius:0 14px 14px 0; transition:opacity 0.2s; opacity:0;
+}
+.task-card:hover::before { opacity:1; background:var(--purple); }
+.task-card.urgent::before { opacity:1; background:var(--red); }
+.task-card.urgent { border-color:rgba(255,82,82,0.2); }
+
+.task-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:12px; }
+.task-name { font-size:1rem; font-weight:700; margin-bottom:4px; }
+.task-meta { font-size:0.75rem; color:var(--text-dim); display:flex; gap:12px; flex-wrap:wrap; }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:6px;
+  font-size:0.7rem; font-family:'Space Mono',monospace; font-weight:700;
+}
+.badge-green  { background:rgba(0,230,118,0.12); color:var(--green); }
+.badge-cyan   { background:rgba(0,229,255,0.12); color:var(--cyan); }
+.badge-gold   { background:rgba(255,214,0,0.12); color:var(--gold); }
+.badge-red    { background:rgba(255,82,82,0.12); color:var(--red); }
+.badge-dim    { background:rgba(255,255,255,0.06); color:var(--text-dim); }
+.badge-purple { background:rgba(206,147,216,0.12); color:var(--purple); }
+
+.progress-bar { height:5px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; margin:12px 0; }
+.progress-fill { height:100%; border-radius:3px; transition:width 0.8s; }
+
+.task-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.btn-action {
+  background:var(--surface2); border:1px solid var(--border2);
+  color:var(--text-dim); padding:7px 14px; border-radius:8px;
+  font-size:0.8rem; cursor:pointer; transition:all 0.2s;
+  font-family:'Tajawal',sans-serif;
+}
+.btn-action:hover { border-color:var(--green); color:var(--green); }
+.btn-action.primary { background:var(--green); color:#000; border-color:var(--green); font-weight:700; }
+.btn-action.primary:hover { box-shadow:0 4px 16px rgba(0,230,118,0.3); }
+.btn-action.danger:hover { border-color:var(--red); color:var(--red); }
+
+/* ─── DETAIL MODAL ─── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(8px); z-index:100;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal-panel {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; width:560px; max-width:96vw;
+  max-height:88vh; overflow-y:auto;
+  box-shadow:0 40px 80px rgba(0,0,0,0.5);
+  transform:scale(0.96); transition:transform 0.3s;
+}
+.modal-overlay.open .modal-panel { transform:scale(1); }
+.modal-header {
+  padding:18px 22px; border-bottom:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; background:var(--surface); z-index:1;
+}
+.modal-close {
+  background:none; border:none; color:var(--text-dim);
+  font-size:1.2rem; cursor:pointer; padding:4px 8px; border-radius:6px;
+}
+
+/* ─── STATUS UPDATER ─── */
+.status-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.status-btn {
+  padding:12px; border-radius:10px; text-align:center;
+  cursor:pointer; font-size:0.85rem; font-weight:600;
+  border:2px solid transparent; transition:all 0.2s;
+  font-family:'Tajawal',sans-serif;
+}
+.status-btn.s-processing { background:rgba(0,229,255,0.08); color:var(--cyan); border-color:rgba(0,229,255,0.2); }
+.status-btn.s-review     { background:rgba(255,214,0,0.08); color:var(--gold); border-color:rgba(255,214,0,0.2); }
+.status-btn.s-done       { background:rgba(0,230,118,0.08); color:var(--green); border-color:rgba(0,230,118,0.2); }
+.status-btn.s-queue      { background:rgba(255,255,255,0.04); color:var(--text-dim); border-color:var(--border2); }
+.status-btn:hover { transform:translateY(-2px); filter:brightness(1.2); }
+.status-btn.current { border-width:2px; filter:brightness(1.3); }
+
+/* ─── NOTE INPUT ─── */
+.note-input {
+  width:100%; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:9px; padding:10px 14px; color:var(--text);
+  font-family:'Tajawal',sans-serif; font-size:0.88rem;
+  outline:none; resize:vertical; transition:border-color 0.2s;
+}
+.note-input:focus { border-color:var(--green); }
+
+/* ─── EMPTY ─── */
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-dim); }
+.empty-state .icon { font-size:2.5rem; margin-bottom:12px; opacity:0.5; }
+
+/* ─── TOAST ─── */
+.toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(60px);
+  background:var(--surface3); border:1px solid var(--green);
+  color:var(--green); padding:11px 22px; border-radius:10px;
+  font-size:0.82rem; font-family:'Space Mono',monospace;
+  z-index:999; transition:transform 0.3s; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+@media(max-width:600px){
+  .content { padding:16px 12px; }
+  .stats-row { grid-template-columns:1fr 1fr; gap:10px; }
+  .topbar { padding:12px 14px; }
+  .tabs { gap:2px; }
+  .tab { font-size:0.8rem; padding:8px 6px; }
+  .status-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── AUTH ─── -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">GameLex</div>
+    <div class="auth-sub">بوابة الفريق</div>
+    <div style="text-align:center;margin-bottom:20px;">
+      <span class="auth-badge">👥 Team Portal</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">EMAIL</label>
+      <input class="form-input" type="email" id="t-email" placeholder="you@gamelex.sa">
+    </div>
+    <div class="form-group">
+      <label class="form-label">PASSWORD</label>
+      <input class="form-input" type="password" id="t-pass" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-submit" id="login-btn" onclick="doLogin()">🔐 دخول</button>
+    <button onclick="toggleSignup()" id="signup-toggle"
+      style="width:100%;margin-top:10px;background:transparent;border:1px solid var(--border2);
+      color:var(--text-dim);padding:11px;border-radius:9px;cursor:pointer;
+      font-family:'Tajawal',sans-serif;font-size:0.88rem;transition:all 0.2s;"
+      onmouseover="this.style.borderColor='var(--green)'"
+      onmouseout="this.style.borderColor='var(--border2)'">
+      ليس لديك حساب؟ سجل الآن
+    </button>
+    <div id="signup-form" style="display:none;margin-top:14px;border-top:1px solid var(--border2);padding-top:14px;">
+      <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:12px;text-align:center;">إنشاء حساب جديد — تأكد أن الأدمن أضاف بريدك في الفريق</div>
+      <div class="form-group">
+        <label class="form-label">كلمة مرور جديدة</label>
+        <input class="form-input" type="password" id="t-newpass" placeholder="6+ أحرف">
+      </div>
+      <button class="btn-submit" style="background:var(--purple);margin-top:4px;" onclick="doSignup()">🚀 إنشاء حساب</button>
+    </div>
+    <div class="auth-msg" id="auth-msg"></div>
+    <div style="text-align:center;margin-top:16px;font-size:0.8rem;color:var(--text-dim);">
+      <a href="index.html" style="color:var(--green);text-decoration:none;">← العودة للمنصة الرئيسية</a>
+    </div>
+  </div>
+</div>
+
+<!-- ─── APP ─── -->
+<div class="app" id="app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-logo">GL Team</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="member-chip">
+        <div class="member-av" id="m-av">?</div>
+        <span id="m-name" style="font-size:0.82rem;">...</span>
+        <span class="badge badge-purple" id="m-role" style="font-size:0.65rem;">—</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">MY TASKS</div>
+        <div class="stat-val" id="s-total" style="color:var(--purple);">0</div>
+        <div class="stat-sub">إجمالي المهام</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">IN PROGRESS</div>
+        <div class="stat-val" id="s-proc" style="color:var(--cyan);">0</div>
+        <div class="stat-sub">قيد التنفيذ</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">COMPLETED</div>
+        <div class="stat-val" id="s-done" style="color:var(--green);">0</div>
+        <div class="stat-sub">مكتملة</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-active" onclick="switchTab('active')">⚡ نشطة</button>
+      <button class="tab" id="tab-review" onclick="switchTab('review')">⏳ مراجعة</button>
+      <button class="tab" id="tab-done" onclick="switchTab('done')">✓ مكتملة</button>
+      <button class="tab" id="tab-all" onclick="switchTab('all')">📋 الكل</button>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list" id="task-list">
+      <div style="text-align:center;padding:40px;color:var(--text-dim);">⟳ جاري التحميل...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── TASK DETAIL MODAL ─── -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div style="font-weight:700;font-size:0.95rem;" id="modal-title">تفاصيل المهمة</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="padding:20px;" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL = 'https://ntecfdtkwyijhvdilyqn.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZWNmZHRrd3lpamh2ZGlseXFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNTczNTIsImV4cCI6MjA5NTczMzM1Mn0.lnhooFQfkBpFM8JijWAwxFtJT4gWegq7V7KwF0lsIm4';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+let currentMember = null;
+let allTasks = [];
+let currentTab = 'active';
+
+// ─── AUTH ───
+sb.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user || null;
+  if (currentUser) loadMemberProfile();
+  else showAuth();
+});
+
+function toggleSignup() {
+  const form = document.getElementById('signup-form');
+  const btn = document.getElementById('signup-toggle');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.textContent = 'لديك حساب؟ سجل دخول';
+  } else {
+    form.style.display = 'none';
+    btn.textContent = 'ليس لديك حساب؟ سجل الآن';
+  }
+}
+
+async function doSignup() {
+  const email = document.getElementById('t-email').value.trim();
+  const pass  = document.getElementById('t-newpass').value;
+  const msgEl = document.getElementById('auth-msg');
+  msgEl.style.display = 'none';
+  if (!email || !pass) { showMsg(msgEl, 'يرجى إدخال البريد وكلمة المرور', 'err'); return; }
+  if (pass.length < 6) { showMsg(msgEl, 'كلمة المرور 6 أحرف على الأقل', 'err'); return; }
+
+  const { error } = await sb.auth.signUp({ email, password: pass });
+  if (error) showMsg(msgEl, error.message, 'err');
+  else showMsg(msgEl, '✓ تم إنشاء الحساب! تحقق من بريدك ثم سجل دخول.', 'ok');
+}
+
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  const email = document.getElementById('t-email').value.trim();
+  const pass  = document.getElementById('t-pass').value;
+  const msgEl = document.getElementById('auth-msg');
+  msgEl.style.display = 'none';
+  if (!email || !pass) { showMsg(msgEl, 'يرجى تعبئة الحقول', 'err'); return; }
+  btn.disabled = true; btn.textContent = '...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.disabled = false; btn.textContent = '🔐 دخول';
+  if (error) showMsg(msgEl, error.message, 'err');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentMember = null;
+}
+
+function showAuth() {
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+async function loadMemberProfile() {
+  // First try by user_id
+  let { data } = await sb.from('team_members')
+    .select('*').eq('user_id', currentUser.id).single();
+
+  // If not found, try by email and auto-link
+  if (!data) {
+    const emailRes = await sb.from('team_members')
+      .select('*').eq('email', currentUser.email).single();
+
+    if (emailRes.data) {
+      // Auto-link: save user_id
+      await sb.from('team_members')
+        .update({ user_id: currentUser.id })
+        .eq('id', emailRes.data.id);
+      data = { ...emailRes.data, user_id: currentUser.id };
+    }
+  }
+
+  if (!data) {
+    showAuth();
+    const msgEl = document.getElementById('auth-msg');
+    showMsg(msgEl, '✕ حسابك غير مرتبط بعضو فريق — تواصل مع الأدمن', 'err');
+    await sb.auth.signOut();
+    return;
+  }
+
+  currentMember = data;
+  const roleLabels = { translator:'مترجم', reviewer:'مراجع', qa:'جودة', manager:'مدير' };
+
+  document.getElementById('m-av').textContent = data.name?.[0]?.toUpperCase() || '?';
+  document.getElementById('m-name').textContent = data.name;
+  document.getElementById('m-role').textContent = roleLabels[data.role] || data.role;
+
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  loadTasks();
+}
+
+// ─── TASKS ───
+async function loadTasks() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">⟳ جاري التحميل...</div>';
+
+  const { data, error } = await sb.from('packages')
+    .select('*')
+    .eq('assigned_to', currentMember.id)
+    .order('created_at', { ascending: false });
+
+  allTasks = data || [];
+  updateStats();
+  renderTasks();
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = allTasks.length;
+  document.getElementById('s-proc').textContent  = allTasks.filter(t => t.status === 'processing').length;
+  document.getElementById('s-done').textContent  = allTasks.filter(t => t.status === 'done').length;
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  let tasks = allTasks;
+
+  if (currentTab === 'active')  tasks = allTasks.filter(t => t.status === 'processing' || t.status === 'queue');
+  if (currentTab === 'review')  tasks = allTasks.filter(t => t.status === 'review');
+  if (currentTab === 'done')    tasks = allTasks.filter(t => t.status === 'done');
+
+  if (!tasks.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="icon">📋</div>
+      <div style="font-size:0.9rem;">لا توجد مهام في هذا القسم</div>
+    </div>`;
+    return;
+  }
+
+  const statusCfg = {
+    done:       { label:'✓ مكتملة',    cls:'badge-green',  color:'var(--green)',  pct:100 },
+    processing: { label:'⟳ تعالج',     cls:'badge-cyan',   color:'var(--cyan)',   pct:60  },
+    review:     { label:'⏳ مراجعة',   cls:'badge-gold',   color:'var(--gold)',   pct:85  },
+    queue:      { label:'◷ انتظار',    cls:'badge-dim',    color:'var(--text-dim)',pct:10 },
+  };
+
+  list.innerHTML = tasks.map(t => {
+    const sc = statusCfg[t.status] || statusCfg.queue;
+    const date = t.created_at ? new Date(t.created_at).toLocaleDateString('ar-SA') : '—';
+    const isUrgent = t.deadline && new Date(t.deadline) < new Date(Date.now() + 86400000*2);
+    const deadlineStr = t.deadline ? new Date(t.deadline).toLocaleDateString('ar-SA') : null;
+
+    return `
+    <div class="task-card ${isUrgent && t.status !== 'done' ? 'urgent' : ''}" onclick="openTask('${t.id}')">
+      <div class="task-header">
+        <div>
+          <div class="task-name">${t.game_name}</div>
+          <div class="task-meta">
+            <span>📁 ${(t.assets_count||0).toLocaleString('ar')} أصل</span>
+            <span>📅 ${date}</span>
+            ${deadlineStr ? `<span style="color:${isUrgent ? 'var(--red)' : 'var(--text-dim)'};">⏰ ${deadlineStr}</span>` : ''}
+            ${isUrgent && t.status !== 'done' ? '<span style="color:var(--red);font-weight:600;">🔴 عاجل</span>' : ''}
+          </div>
+        </div>
+        <span class="badge ${sc.cls}">${sc.label}</span>
+      </div>
+
+      ${t.notes ? `<div style="font-size:0.8rem;color:var(--cyan);background:rgba(0,229,255,0.06);border-radius:7px;padding:8px 12px;margin-bottom:10px;">📝 ${t.notes}</div>` : ''}
+
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${sc.pct}%;background:${sc.color};"></div>
+      </div>
+
+      <div class="task-actions" onclick="event.stopPropagation()">
+        ${t.status !== 'done' ? `
+          ${t.status === 'queue' ? `<button class="btn-action primary" onclick="quickUpdate('${t.id}','processing')">▶ ابدأ العمل</button>` : ''}
+          ${t.status === 'processing' ? `<button class="btn-action primary" onclick="quickUpdate('${t.id}','review')">⏳ أرسل للمراجعة</button>` : ''}
+          ${t.status === 'review' ? `<button class="btn-action primary" onclick="quickUpdate('${t.id}','done')">✓ أكمل</button>` : ''}
+        ` : '<span style="color:var(--green);font-size:0.82rem;">✓ مكتملة</span>'}
+        <button class="btn-action" onclick="openTask('${t.id}')">📋 التفاصيل</button>
+        <button class="btn-action" onclick="openFiles('${t.id}','${t.game_name}')">📁 الملفات</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── QUICK UPDATE ───
+async function quickUpdate(pkgId, newStatus) {
+  const task = allTasks.find(t => t.id === pkgId);
+  const { error } = await sb.from('packages').update({ status: newStatus }).eq('id', pkgId);
+  if (error) { toast('✕ خطأ في التحديث'); return; }
+
+  // Log
+  await sb.from('package_updates').insert([{
+    package_id: pkgId,
+    old_status: task?.status,
+    new_status: newStatus,
+    note: `تحديث من الفريق: ${task?.game_name}`
+  }]);
+
+  // Notify admin
+  await notifyAdminStatusUpdate(task, newStatus);
+
+  allTasks = allTasks.map(t => t.id === pkgId ? {...t, status: newStatus} : t);
+  updateStats();
+  renderTasks();
+
+  const labels = { processing:'▶ بدأت العمل', review:'⏳ أرسلت للمراجعة', done:'✓ اكتملت المهمة!' };
+  toast(labels[newStatus] || '✓ تم التحديث');
+}
+
+// ─── TASK DETAIL ───
+async function openTask(pkgId) {
+  const task = allTasks.find(t => t.id === pkgId);
+  if (!task) return;
+
+  document.getElementById('modal-title').textContent = task.game_name;
+  document.getElementById('taskModal').classList.add('open');
+
+  const sc = {
+    done:{ label:'✓ مكتملة', color:'var(--green)' },
+    processing:{ label:'⟳ تعالج', color:'var(--cyan)' },
+    review:{ label:'⏳ مراجعة', color:'var(--gold)' },
+    queue:{ label:'◷ انتظار', color:'var(--text-dim)' },
+  };
+  const s = sc[task.status] || sc.queue;
+  const date = task.created_at ? new Date(task.created_at).toLocaleString('ar-SA') : '—';
+  const deadline = task.deadline ? new Date(task.deadline).toLocaleDateString('ar-SA') : '—';
+
+  // Load timeline
+  const { data: updates } = await sb.from('package_updates')
+    .select('*').eq('package_id', pkgId).order('created_at', { ascending: false });
+
+  document.getElementById('modal-body').innerHTML = `
+    <!-- Info -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div style="background:var(--surface2);border-radius:9px;padding:12px 14px;">
+        <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px;">STATUS</div>
+        <div style="font-weight:700;color:${s.color};">${s.label}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:9px;padding:12px 14px;">
+        <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px;">ASSETS</div>
+        <div style="font-weight:700;">${(task.assets_count||0).toLocaleString('ar')}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:9px;padding:12px 14px;">
+        <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px;">TYPE</div>
+        <div style="font-weight:600;font-size:0.85rem;">${task.type||'AI+Human'}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:9px;padding:12px 14px;">
+        <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px;">DEADLINE</div>
+        <div style="font-weight:600;font-size:0.85rem;">${deadline}</div>
+      </div>
+    </div>
+
+    ${task.notes ? `<div style="background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.15);border-radius:10px;padding:14px;margin-bottom:20px;font-size:0.85rem;color:var(--cyan);">📝 ${task.notes}</div>` : ''}
+
+    <!-- Status Update -->
+    ${task.status !== 'done' ? `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:0.78rem;color:var(--text-dim);margin-bottom:10px;font-family:'Space Mono',monospace;letter-spacing:1px;">UPDATE STATUS</div>
+      <div class="status-grid">
+        <div class="status-btn s-processing ${task.status==='processing'?'current':''}" onclick="quickUpdate('${task.id}','processing');closeModal()">⟳ جاري التنفيذ</div>
+        <div class="status-btn s-review ${task.status==='review'?'current':''}" onclick="quickUpdate('${task.id}','review');closeModal()">⏳ للمراجعة</div>
+        <div class="status-btn s-done" onclick="quickUpdate('${task.id}','done');closeModal()">✓ مكتملة</div>
+        <div class="status-btn s-queue ${task.status==='queue'?'current':''}" onclick="quickUpdate('${task.id}','queue');closeModal()">◷ انتظار</div>
+      </div>
+    </div>
+
+    <!-- Add Note -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:0.78rem;color:var(--text-dim);margin-bottom:8px;font-family:'Space Mono',monospace;letter-spacing:1px;">ADD NOTE</div>
+      <textarea class="note-input" id="new-note-${task.id}" rows="3" placeholder="أضف ملاحظة أو تحديث..."></textarea>
+      <button class="btn-action primary" style="margin-top:8px;width:100%;justify-content:center;" onclick="addNote('${task.id}')">💬 إضافة ملاحظة</button>
+    </div>` : ''}
+
+    <!-- Timeline -->
+    ${updates?.length ? `
+    <div>
+      <div style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:10px;">TIMELINE</div>
+      ${updates.map(u => `
+        <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="font-size:0.82rem;">${u.note || `${u.old_status||'—'} → ${u.new_status}`}</div>
+            <div style="font-size:0.68rem;color:var(--text-dim);margin-top:2px;">${timeAgo(u.created_at)}</div>
+          </div>
+        </div>`).join('')}
+    </div>` : '<div style="text-align:center;padding:16px;color:var(--text-dim);font-size:0.82rem;">لا يوجد تاريخ بعد</div>'}
+
+    <!-- Files -->
+    <div style="margin-top:20px;">
+      <button class="btn-action" style="width:100%;justify-content:center;" onclick="openFiles('${task.id}','${task.game_name}')">📁 عرض الملفات المرفوعة</button>
+    </div>`;
+}
+
+async function addNote(pkgId) {
+  const noteEl = document.getElementById('new-note-'+pkgId);
+  const note = noteEl?.value.trim();
+  if (!note) { toast('⚠️ أدخل ملاحظة أولاً'); return; }
+
+  await sb.from('package_updates').insert([{
+    package_id: pkgId,
+    note: `💬 ${currentMember.name}: ${note}`
+  }]);
+
+  noteEl.value = '';
+  toast('✓ تمت إضافة الملاحظة');
+  openTask(pkgId); // reload
+}
+
+function closeModal() {
+  document.getElementById('taskModal').classList.remove('open');
+}
+
+// ─── FILES ───
+async function openFiles(pkgId, gameName) {
+  const task = allTasks.find(t => t.id === pkgId);
+  if (!task) return;
+
+  const folderPath = `${task.user_id}/${pkgId}`;
+  const { data: files } = await sb.storage.from('packages').list(folderPath, { limit: 100 });
+  const realFiles = (files||[]).filter(f => f.name && f.name !== '.emptyFolderPlaceholder');
+
+  if (!realFiles.length) { toast('لا توجد ملفات مرفوعة لهذه الحزمة'); return; }
+
+  document.getElementById('modal-title').textContent = `📁 ${gameName}`;
+  document.getElementById('taskModal').classList.add('open');
+
+  const fileIcons = { png:'🖼️', jpg:'🖼️', mp3:'🎵', json:'📋', csv:'📊', po:'📝', xliff:'📝', zip:'📦', pdf:'📄', txt:'📄', js:'📝' };
+
+  document.getElementById('modal-body').innerHTML = realFiles.map(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    const icon = fileIcons[ext] || '📄';
+    const sz = f.metadata?.size || 0;
+    const size = sz > 1048576 ? (sz/1048576).toFixed(1)+' MB' : sz > 1024 ? Math.round(sz/1024)+' KB' : sz+' B';
+    const path = `${folderPath}/${f.name}`;
+    const { data: urlData } = sb.storage.from('packages').getPublicUrl(path);
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:10px;padding:12px 16px;margin-bottom:10px;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+        <span style="font-size:1.3rem;">${icon}</span>
+        <div>
+          <div style="font-weight:600;font-size:0.85rem;">${f.name}</div>
+          <div style="font-size:0.7rem;color:var(--text-dim);">${size}</div>
+        </div>
+      </div>
+      <a href="${urlData?.publicUrl}" target="_blank" download="${f.name}"
+        style="background:var(--green);color:#000;border:none;padding:7px 14px;
+        border-radius:7px;font-size:0.82rem;font-weight:700;cursor:pointer;
+        text-decoration:none;white-space:nowrap;">
+        ⬇️ تحميل
+      </a>
+    </div>`;
+  }).join('');
+}
+
+// ─── TELEGRAM NOTIFY ───
+async function notifyAdminStatusUpdate(task, newStatus) {
+  try {
+    const { data: settings } = await sb.from('telegram_settings').select('*');
+    if (!settings) return;
+    const cfg = {};
+    settings.forEach(s => cfg[s.key] = s.value);
+    if (!cfg.bot_token || !cfg.admin_chat_id || cfg.notify_admin !== 'true') return;
+    const statusLabels = { processing:'⟳ بدأ التنفيذ', review:'⏳ أُرسل للمراجعة', done:'✅ مكتملة', queue:'◷ انتظار' };
+    const msg = `🔄 <b>GameLex — تحديث من الفريق</b>\n\n📦 ${task?.game_name}\n👤 ${currentMember?.name}\n📊 ${statusLabels[newStatus]||newStatus}`;
+    await fetch(`https://api.telegram.org/bot${cfg.bot_token}/sendMessage`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: cfg.admin_chat_id, text: msg, parse_mode:'HTML' })
+    });
+  } catch(e) {}
+}
+
+// ─── HELPERS ───
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if (m < 1) return 'الآن';
+  if (m < 60) return `${m} دقيقة`;
+  const h = Math.floor(m/60);
+  if (h < 24) return `${h} ساعة`;
+  return `${Math.floor(h/24)} يوم`;
+}
+
+function showMsg(el, txt, type) {
+  el.className = 'auth-msg ' + type;
+  el.textContent = txt;
+  el.style.display = 'block';
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('taskModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Init
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    currentUser = session.user;
+    loadMemberProfile();
+  } else {
+    showAuth();
+  }
+});
+</script>
+</body>
+</html>

@@ -410,40 +410,65 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
 
 .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:24px; }
 
+/* ═══ RESPONSIVE ═══ */
+
+/* Tablet */
+@media(max-width:1024px){
+  .content { padding:28px 24px; }
+  .grid-2 { gap:16px; }
+  .pkg-card { gap:14px; }
+}
+
+/* Mobile */
 @media(max-width:768px){
   .content { padding:16px 14px; }
-  .stats-row { grid-template-columns:repeat(2,1fr); gap:12px; }
-  .welcome-banner { flex-direction:column; gap:16px; padding:24px 20px; }
-  .welcome-actions { width:100%; flex-direction:column; }
-  .welcome-actions .btn-primary,
-  .welcome-actions .btn-outline { width:100%; justify-content:center; }
-  .grid-2 { grid-template-columns:1fr; gap:16px; }
-  .pkg-card { grid-template-columns:auto 1fr auto; gap:12px; padding:16px; }
-  .pkg-progress { display:none; }
   .topbar { padding:12px 14px; }
   .topbar-logo { font-size:1.1rem; }
-  .user-pill span { display:none; }
-  .auth-card { padding:32px 22px; }
-  .modal { padding:28px 18px; }
-  .option-row { grid-template-columns:1fr 1fr 1fr; gap:8px; }
-  .option-btn { padding:10px 6px; font-size:0.75rem; }
-  .detail-panel { max-height:92vh; }
-  .detail-body { padding:20px; }
-  .detail-info-grid { grid-template-columns:1fr 1fr; gap:10px; }
-  .stat-card { padding:16px 14px; }
-  .stat-val { font-size:1.5rem; }
+  .user-pill span:not(.user-av) { display:none; }
+  .logout-btn { padding:5px 10px; font-size:0.78rem; }
+  .welcome-banner { flex-direction:column; gap:16px; padding:22px 18px; }
   .welcome-text h2 { font-size:1.2rem; }
+  .welcome-actions { width:100%; flex-direction:row; flex-wrap:wrap; gap:8px; }
+  .welcome-actions .btn-primary,
+  .welcome-actions .btn-outline { flex:1; min-width:120px; justify-content:center; padding:10px 12px; font-size:0.85rem; }
+  .stats-row { grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
+  .stat-card { padding:14px; }
+  .stat-val { font-size:1.4rem; }
+  .stat-label { font-size:0.65rem; }
+  .grid-2 { grid-template-columns:1fr; gap:16px; }
+  .pkg-card { grid-template-columns:auto 1fr auto; gap:12px; padding:14px 16px; }
+  .pkg-progress { display:none; }
+  .pkg-name { font-size:0.9rem; }
+  .pkg-meta { font-size:0.72rem; gap:8px; }
+  .section-title { font-size:0.9rem; }
+  .modal { padding:24px 16px; width:96vw; }
+  .option-row { grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .option-btn { padding:10px 6px; font-size:0.78rem; }
+  .upload-zone { padding:28px 16px; }
+  .detail-panel { max-height:92vh; border-radius:16px; }
+  .detail-body { padding:18px; }
+  .detail-info-grid { grid-template-columns:1fr 1fr; gap:10px; }
+  .detail-steps::before { right:20px; left:20px; }
+  .auth-card { padding:28px 18px; }
+  .auth-tabs { margin-bottom:18px; }
 }
-@media(max-width:400px){
-  .stats-row { grid-template-columns:1fr 1fr; gap:10px; }
-  .stat-val { font-size:1.3rem; }
+
+/* Small mobile */
+@media(max-width:480px){
+  .stats-row { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .stat-card { padding:12px; }
+  .stat-val { font-size:1.2rem; }
   .pkg-card { grid-template-columns:auto 1fr; }
   .pkg-card > div:last-child { display:none; }
   .content { padding:12px 10px; }
   .topbar { padding:10px 12px; }
+  .welcome-banner { padding:16px 14px; }
+  .welcome-text h2 { font-size:1.1rem; }
   .detail-info-grid { grid-template-columns:1fr; }
-  .option-row { grid-template-columns:1fr; gap:8px; }
-  .auth-card { padding:28px 16px; }
+  .option-row { grid-template-columns:1fr 1fr 1fr; }
+  .modal-title { font-size:1rem; }
+  .auth-card { padding:24px 14px; }
+  .form-input { padding:10px 12px; }
 }
 </style>
 </head>
@@ -453,11 +478,11 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
 <div class="auth-screen" id="authScreen">
   <div class="auth-card">
     <div class="auth-logo">GameLex</div>
-    <div class="auth-tagline">بوابة العميل — أدر حزم التوطين الخاصة بك</div>
+    <div class="auth-tagline"><span data-i18n="client_tagline">بوابة العميل — أدر حزم التوطين الخاصة بك</span></div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-in" onclick="switchTab('in')">دخول</button>
-      <button class="auth-tab" id="tab-up" onclick="switchTab('up')">حساب جديد</button>
+      <button class="auth-tab active" id="tab-in" onclick="switchTab('in')"><span data-i18n="tab_login_c">دخول</span></button>
+      <button class="auth-tab" id="tab-up" onclick="switchTab('up')"><span data-i18n="tab_signup_c">حساب جديد</span></button>
     </div>
 
     <!-- Login -->
@@ -510,7 +535,7 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
         <div class="user-av" id="u-av">?</div>
         <span id="u-name" style="font-size:0.82rem;">...</span>
       </div>
-      <button class="logout-btn" onclick="doLogout()">خروج ↩</button>
+      <button class="logout-btn" onclick="doLogout()"><span data-i18n="logout">خروج ↩</span></button>
     </div>
   </div>
 
@@ -521,11 +546,11 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
     <div class="welcome-banner">
       <div class="welcome-text">
         <h2>أهلاً، <span id="studio-name">...</span> 👋</h2>
-        <p>تابع حزم التوطين الخاصة بك وأطلق مشاريع جديدة</p>
+        <p><span data-i18n="welcome_sub">تابع حزم التوطين الخاصة بك وأطلق مشاريع جديدة</span></p>
       </div>
       <div class="welcome-actions">
-        <button class="btn-primary" onclick="openUpload()">📦 حزمة جديدة</button>
-        <button class="btn-outline" onclick="loadPackages()">↻ تحديث</button>
+        <button class="btn-primary" onclick="openUpload()"><span data-i18n="new_package">📦 حزمة جديدة</span></button>
+        <button class="btn-outline" onclick="loadPackages()"><span data-i18n="refresh_btn">↻ تحديث</span></button>
       </div>
     </div>
 
@@ -534,22 +559,22 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
       <div class="stat-card">
         <div class="stat-label">TOTAL PACKAGES</div>
         <div class="stat-val green" id="s-total">0</div>
-        <div class="stat-sub">إجمالي الحزم</div>
+        <div class="stat-sub"><span data-i18n="stat_total">إجمالي الحزم</span></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">COMPLETED</div>
         <div class="stat-val cyan" id="s-done">0</div>
-        <div class="stat-sub">مكتملة ✓</div>
+        <div class="stat-sub"><span data-i18n="stat_completed">مكتملة ✓</span></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">IN PROGRESS</div>
         <div class="stat-val gold" id="s-proc">0</div>
-        <div class="stat-sub">قيد المعالجة</div>
+        <div class="stat-sub"><span data-i18n="stat_inprogress">قيد المعالجة</span></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">TOTAL ASSETS</div>
         <div class="stat-val dim" id="s-assets">0</div>
-        <div class="stat-sub">أصل مُترجم</div>
+        <div class="stat-sub"><span data-i18n="stat_assets">أصل مُترجم</span></div>
       </div>
     </div>
 
@@ -559,8 +584,8 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
       <!-- Packages -->
       <div>
         <div class="section-header">
-          <div class="section-title">📦 حزمي</div>
-          <button class="btn-primary" style="padding:8px 16px;font-size:0.82rem;" onclick="openUpload()">+ جديد</button>
+          <div class="section-title" data-i18n="my_packages">📦 حزمي</div>
+          <button class="btn-primary" style="padding:8px 16px;font-size:0.82rem;" onclick="openUpload()">+ <span data-i18n="refresh_btn">↻ تحديث</span></button>
         </div>
         <div class="pkg-grid" id="pkg-list">
           <div style="text-align:center;padding:40px;color:var(--text-dim);font-size:0.85rem;">⟳ جاري التحميل...</div>
@@ -572,17 +597,17 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
 
         <!-- Quick actions -->
         <div class="card">
-          <div class="card-header"><div class="card-title">⚡ إجراءات سريعة</div></div>
+          <div class="card-header"><div class="card-title"><span data-i18n="quick_actions">⚡ إجراءات سريعة</span></div></div>
           <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
-            <button class="btn-primary" style="justify-content:center;" onclick="openUpload()">📦 رفع حزمة جديدة</button>
-            <button class="btn-outline" onclick="openGlossary()">📖 إدارة المصطلحات</button>
-            <button class="btn-outline" onclick="openReports()">📊 تقرير الجودة</button>
+            <button class="btn-primary" style="justify-content:center;" onclick="openUpload()"><span data-i18n="upload_new">📦 رفع حزمة جديدة</span></button>
+            <button class="btn-outline" onclick="openGlossary()"><span data-i18n="manage_glossary">📖 إدارة المصطلحات</span></button>
+            <button class="btn-outline" onclick="openReports()"><span data-i18n="quality_report">📊 تقرير الجودة</span></button>
           </div>
         </div>
 
         <!-- Activity feed -->
         <div class="card">
-          <div class="card-header"><div class="card-title">🕐 آخر النشاطات</div></div>
+          <div class="card-header"><div class="card-title"><span data-i18n="recent_activity">🕐 آخر النشاطات</span></div></div>
           <div class="timeline" id="activity-feed" style="padding:8px 16px;">
             <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:0.82rem;">لا نشاطات بعد</div>
           </div>
@@ -590,9 +615,9 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
 
         <!-- Support -->
         <div class="card">
-          <div class="card-header"><div class="card-title">💬 الدعم</div></div>
+          <div class="card-header"><div class="card-title"><span data-i18n="support">💬 الدعم</span></div></div>
           <div style="padding:16px;">
-            <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">فريقنا متاح للمساعدة</p>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;"><span data-i18n="support_sub">فريقنا متاح للمساعدة</span></p>
             <a href="mailto:support@gamelex.sa" style="color:var(--green);font-size:0.85rem;text-decoration:none;">✉️ support@gamelex.sa</a>
           </div>
         </div>
@@ -606,7 +631,7 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
 <!-- ─── UPLOAD MODAL ─── -->
 <div class="modal-overlay" id="uploadModal">
   <div class="modal">
-    <div class="modal-title">📦 حزمة توطين جديدة</div>
+    <div class="modal-title" data-i18n="new_pkg_modal">📦 حزمة توطين جديدة</div>
 
     <div class="form-group">
       <label class="form-label">GAME NAME</label>
@@ -721,6 +746,7 @@ body { background:var(--bg); color:var(--text); font-family:'Tajawal',sans-serif
       </div>
 
       <!-- Actions -->
+      <div id="d-timeline" style="display:none;margin-bottom:20px;"></div>
       <div style="display:flex;gap:10px;">
         <button class="btn-outline" style="flex:1;" onclick="toast('تحميل التقرير قريباً')">📄 تحميل التقرير</button>
         <button class="btn-outline" onclick="closeDetail()">إغلاق</button>
@@ -939,9 +965,9 @@ function renderPackages() {
     list.innerHTML = `
       <div class="empty-pkg">
         <div class="e-icon">📦</div>
-        <h3>لا توجد حزم بعد</h3>
-        <p>ارفع أول حزمة توطين وابدأ رحلتك</p>
-        <button class="btn-primary" onclick="openUpload()">📦 حزمة جديدة</button>
+        <h3>${i18n.t('no_packages')}</h3>
+        <p>${i18n.t('upload_first')}</p>
+        <button class="btn-primary" onclick="openUpload()">${i18n.t('new_package')}</button>
       </div>`;
     return;
   }
@@ -1062,11 +1088,13 @@ async function launchPackage() {
   updateStats();
   renderPackages();
   renderActivity();
+  // Notify admin via Telegram
+  notifyAdminNewPackage(pkg);
   setTimeout(closeUpload, 2200);
 }
 
 // ─── DETAIL MODAL ───
-function openDetail(id) {
+async function openDetail(id) {
   const pkg = packages.find(p=>p.id===id);
   if (!pkg) return;
   const sc = statusCfg[pkg.status] || statusCfg.queue;
@@ -1075,8 +1103,8 @@ function openDetail(id) {
   document.getElementById('d-title').textContent = pkg.game_name;
   document.getElementById('d-pct').textContent = sc.pct + '%';
   document.getElementById('d-progress-fill').style.width = sc.pct + '%';
+  document.getElementById('detailOverlay').classList.add('open');
 
-  // Steps
   const stepOrder = ['queue','processing','review','done'];
   const curIdx = stepOrder.indexOf(pkg.status);
   const stepLabels = ['استلام','معالجة AI','مراجعة','تسليم'];
@@ -1086,16 +1114,46 @@ function openDetail(id) {
     return `<div class="step ${cls}"><div class="step-dot">${icon}</div><div class="step-label">${l}</div></div>`;
   }).join('');
 
+  // Get assigned member name
+  let assignedName = '—';
+  if (pkg.assigned_to) {
+    const { data: m } = await sb.from('team_members').select('name').eq('id', pkg.assigned_to).single();
+    if (m) assignedName = m.name;
+  }
+
   document.getElementById('d-info').innerHTML = `
     <div class="info-item"><div class="info-key">GAME</div><div class="info-val">${pkg.game_name}</div></div>
     <div class="info-item"><div class="info-key">STATUS</div><div class="info-val" style="color:${sc.color};">${sc.label}</div></div>
     <div class="info-item"><div class="info-key">ASSETS</div><div class="info-val">${(pkg.assets_count||0).toLocaleString('ar')}</div></div>
     <div class="info-item"><div class="info-key">TYPE</div><div class="info-val">${pkg.type||'AI+Human'}</div></div>
+    <div class="info-item"><div class="info-key">ASSIGNED</div><div class="info-val" style="color:var(--cyan);">${assignedName}</div></div>
     <div class="info-item"><div class="info-key">DATE</div><div class="info-val" style="font-size:0.82rem;">${date}</div></div>
-    <div class="info-item"><div class="info-key">ID</div><div class="info-val" style="font-size:0.72rem;font-family:'Space Mono',monospace;">${pkg.id.slice(0,12)}...</div></div>
+    ${pkg.notes ? `<div class="info-item" style="grid-column:span 2;"><div class="info-key">NOTES</div><div class="info-val" style="font-size:0.82rem;">${pkg.notes}</div></div>` : ''}
+    ${pkg.deadline ? `<div class="info-item"><div class="info-key">DEADLINE</div><div class="info-val">${new Date(pkg.deadline).toLocaleDateString('ar-SA')}</div></div>` : ''}
   `;
 
-  document.getElementById('detailOverlay').classList.add('open');
+  // Load timeline
+  const { data: updates } = await sb.from('package_updates')
+    .select('*').eq('package_id', id).order('created_at', { ascending: false });
+
+  const timelineEl = document.getElementById('d-timeline');
+  if (timelineEl) {
+    if (updates?.length) {
+      timelineEl.style.display = 'block';
+      timelineEl.innerHTML = `
+        <div style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:8px;letter-spacing:1px;">TIMELINE</div>
+        ${updates.map(u => `
+          <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:0.78rem;">${u.note||u.new_status}</div>
+              <div style="font-size:0.68rem;color:var(--text-dim);">${timeAgo(u.created_at)}</div>
+            </div>
+          </div>`).join('')}`;
+    } else {
+      timelineEl.style.display = 'none';
+    }
+  }
 }
 
 function closeDetail() {
@@ -1349,6 +1407,22 @@ function exportReport() {
 
 document.getElementById('glossaryModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeGlossary(); });
 document.getElementById('reportsModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeReports(); });
+
+// ─── TELEGRAM NOTIFY ───
+async function notifyAdminNewPackage(pkg) {
+  try {
+    const { data: settings } = await sb.from('telegram_settings').select('*');
+    if (!settings) return;
+    const cfg = {};
+    settings.forEach(s => cfg[s.key] = s.value);
+    if (!cfg.bot_token || !cfg.admin_chat_id || cfg.notify_admin !== 'true') return;
+    const msg = `📦 <b>GameLex — حزمة جديدة!</b>\n\n🎮 ${pkg.game_name}\n📁 ${pkg.assets_count||0} أصل\n🔧 ${pkg.type||'AI+Human'}\n\nراجع لوحة الإدارة للتوجيه.`;
+    await fetch(`https://api.telegram.org/bot${cfg.bot_token}/sendMessage`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: cfg.admin_chat_id, text: msg, parse_mode:'HTML' })
+    });
+  } catch(e) {}
+}
 
 function timeAgo(iso) {
   if (!iso) return '—';

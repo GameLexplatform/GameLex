@@ -170,6 +170,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* ═══ TOP BAR ═══ */
@@ -228,8 +230,8 @@ body {
   flex: 1;
 }
 
-.page { display: none; }
-.page.active { display: block; }
+.page { display: none; width: 100%; }
+.page.active { display: block; width: 100%; }
 
 /* ═══ STATS ROW ═══ */
 .stats-row {
@@ -682,6 +684,12 @@ body {
     <div class="nav-item" onclick="showPage('showcase',this)">
       <span class="nav-icon">🎮</span> <span>ألعاب الواجهة</span>
     </div>
+    <div class="nav-item" onclick="showPage('team',this)">
+      <span class="nav-icon">👥</span> <span>الفريق</span>
+    </div>
+    <div class="nav-item" onclick="showPage('telegram',this)">
+      <span class="nav-icon">📲</span> <span>تيليغرام</span>
+    </div>
   </div>
 
   <div class="sidebar-section">
@@ -916,6 +924,92 @@ body {
     </div>
 
     <!-- ═══ PRICING PAGE ═══ -->
+
+    <!-- ═══ TEAM PAGE ═══ -->
+    <div class="page" id="page-team">
+      <!-- Add member form -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header"><div class="card-title">➕ إضافة عضو فريق</div></div>
+        <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><label class="form-label">الاسم</label>
+            <input class="form-input" id="tm-name" placeholder="اسم العضو"></div>
+          <div><label class="form-label">الدور</label>
+            <select class="form-input status-select" id="tm-role" style="padding:11px 14px;height:auto;font-size:0.9rem;">
+              <option value="translator">مترجم</option>
+              <option value="reviewer">مراجع</option>
+              <option value="qa">اختبار جودة</option>
+              <option value="manager">مدير</option>
+            </select>
+          </div>
+          <div><label class="form-label">البريد الإلكتروني</label>
+            <input class="form-input" id="tm-email" placeholder="email@gamelex.sa" style="direction:ltr;"></div>
+          <div><label class="form-label">Telegram Chat ID (اختياري)</label>
+            <input class="form-input" id="tm-tg" placeholder="123456789" style="direction:ltr;"></div>
+          <div style="grid-column:span 2;">
+            <button class="btn-submit" onclick="addTeamMember()" style="width:100%;">➕ إضافة</button>
+            <div id="tm-msg" style="display:none;margin-top:8px;font-size:0.82rem;"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Team list -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">👥 أعضاء الفريق</div>
+          <button class="card-action" onclick="loadTeam()">↻</button>
+        </div>
+        <div style="padding:16px;" id="team-body">
+          <div style="text-align:center;padding:20px;color:var(--text-dim);">⟳ جاري التحميل...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TELEGRAM PAGE ═══ -->
+    <div class="page" id="page-telegram">
+      <div class="card" style="max-width:560px;">
+        <div class="card-header"><div class="card-title">📲 إعدادات تيليغرام</div></div>
+        <div style="padding:24px;">
+          <div style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);border-radius:10px;padding:16px;margin-bottom:20px;font-size:0.82rem;line-height:1.8;">
+            <div style="font-weight:700;margin-bottom:8px;color:var(--cyan);">📋 خطوات التفعيل:</div>
+            <div>١. افتح تيليغرام وابحث عن <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">@BotFather</code></div>
+            <div>٢. أرسل <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">/newbot</code> وأعطه اسم</div>
+            <div>٣. انسخ الـ Token وضعه أدناه</div>
+            <div>٤. لمعرفة Chat ID: ابحث عن <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">@userinfobot</code> وأرسله رسالة</div>
+            <div>٥. للعميل: طلب منه يرسل رسالة للبوت ثم احصل على Chat ID من <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;">/getUpdates</code></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">BOT TOKEN</label>
+            <input class="form-input" id="tg-token" placeholder="1234567890:ABCdefGHI..." style="direction:ltr;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ADMIN CHAT ID</label>
+            <input class="form-input" id="tg-admin" placeholder="Chat ID حقك" style="direction:ltr;">
+          </div>
+
+          <div style="margin:16px 0;border-top:1px solid var(--border2);padding-top:16px;">
+            <div style="font-size:0.82rem;font-weight:600;margin-bottom:12px;">إشعارات تلقائية:</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.85rem;">
+                <input type="checkbox" id="tg-notify-client" checked style="width:16px;height:16px;accent-color:var(--green);">
+                إشعار العميل عند تحديث حزمته
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.85rem;">
+                <input type="checkbox" id="tg-notify-team" checked style="width:16px;height:16px;accent-color:var(--green);">
+                إشعار الفريق عند توجيه حزمة
+              </label>
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.85rem;">
+                <input type="checkbox" id="tg-notify-admin" checked style="width:16px;height:16px;accent-color:var(--green);">
+                إشعار الأدمن عند رفع حزمة جديدة
+              </label>
+            </div>
+          </div>
+
+          <button class="btn-submit" onclick="saveTelegramSettings()" style="width:100%;">💾 حفظ الإعدادات</button>
+          <button onclick="testTelegram()" style="width:100%;margin-top:10px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:11px;border-radius:9px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.9rem;">🧪 إرسال رسالة تجريبية</button>
+          <div id="tg-msg" style="display:none;margin-top:12px;font-size:0.82rem;"></div>
+        </div>
+      </div>
+    </div>
     <div class="page" id="page-pricing">
       <div class="card">
         <div class="card-header">
@@ -1008,6 +1102,86 @@ body {
   </div><!-- end content -->
 </div><!-- end main -->
 
+<!-- ═══ LINK ACCOUNT MODAL ═══ -->
+<div class="modal-overlay" id="linkModal" style="z-index:500;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;
+    width:460px;max-width:96vw;box-shadow:0 40px 80px rgba(0,0,0,0.5);">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--border2);
+      display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-weight:700;font-size:0.95rem;" id="link-title">🔗 ربط حساب بعضو الفريق</div>
+      <button onclick="document.getElementById('linkModal').classList.remove('open')"
+        style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:16px;line-height:1.7;">
+        سجّل حساب للعضو في Supabase أو موقعك، ثم أدخل بريده هنا لربطه.
+      </p>
+
+      <div style="background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.15);border-radius:9px;padding:14px;margin-bottom:16px;font-size:0.8rem;color:var(--cyan);line-height:1.8;">
+        <div style="font-weight:700;margin-bottom:4px;">خيارات إنشاء الحساب:</div>
+        <div>١. من <b>team.html</b> — العضو يسجل بنفسه</div>
+        <div>٢. من <b>Supabase → Auth → Add User</b></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">بريد الحساب المراد ربطه</label>
+        <input class="form-input" id="link-email" placeholder="email@example.com" style="direction:ltr;">
+      </div>
+
+      <button class="btn-submit" onclick="confirmLinkAccount()" style="width:100%;">🔗 ربط الحساب</button>
+      <div id="link-msg" style="display:none;margin-top:10px;font-size:0.82rem;padding:8px 12px;border-radius:7px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ USER PACKAGES MODAL ═══ -->
+<div class="modal-overlay" id="userPkgsModal" style="z-index:500;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;
+    width:640px;max-width:96vw;max-height:88vh;overflow-y:auto;
+    box-shadow:0 40px 80px rgba(0,0,0,0.5);">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--border2);
+      position:sticky;top:0;background:var(--surface);z-index:1;
+      display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-weight:700;font-size:0.95rem;" id="userpkgs-title">📦 حزم المستخدم</div>
+      <button onclick="document.getElementById('userPkgsModal').classList.remove('open')"
+        style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:18px;" id="userpkgs-body"></div>
+  </div>
+</div>
+
+<!-- ═══ ASSIGN MODAL ═══ -->
+<div class="modal-overlay" id="assignModal" style="z-index:500;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;
+    width:480px;max-width:96vw;box-shadow:0 40px 80px rgba(0,0,0,0.5);">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--border2);
+      display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-weight:700;font-size:0.95rem;">👥 توجيه الحزمة لعضو الفريق</div>
+      <button onclick="document.getElementById('assignModal').classList.remove('open')"
+        style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <div style="margin-bottom:12px;font-size:0.85rem;color:var(--text-dim);" id="assign-pkg-name"></div>
+      <div class="form-group">
+        <label class="form-label">اختر عضو الفريق</label>
+        <select class="form-input status-select" id="assign-member" style="font-size:0.9rem;padding:10px 14px;height:auto;">
+          <option value="">— اختر —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ملاحظات للفريق (اختياري)</label>
+        <textarea class="form-input" id="assign-notes" rows="3" placeholder="تعليمات خاصة..." style="resize:vertical;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الموعد النهائي (اختياري)</label>
+        <input class="form-input" type="date" id="assign-deadline" style="direction:ltr;">
+      </div>
+      <button class="btn-submit" onclick="confirmAssign()" style="width:100%;margin-top:4px;">✅ توجيه وإرسال إشعار</button>
+      <div id="assign-msg" style="display:none;margin-top:10px;font-size:0.82rem;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ PKG FILES MODAL ═══ -->
 <div class="modal-overlay" id="pkgFilesModal" style="z-index:500;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;
@@ -1057,11 +1231,19 @@ function checkSecret() {
   if (val === adminSecret) {
     sessionStorage.setItem('gl_secret', '1');
     document.getElementById('authScreen').style.display = 'none';
-    // Only show sidebar on desktop
+    const sidebar = document.getElementById('app-sidebar');
+    const main = document.getElementById('app-main');
+    // Show sidebar only on desktop
     if (window.innerWidth > 900) {
-      document.getElementById('app-sidebar').classList.remove('sidebar-hidden');
+      sidebar.classList.remove('sidebar-hidden');
     }
-    document.getElementById('app-main').classList.remove('main-hidden');
+    // Always show main
+    main.style.display = 'flex';
+    main.classList.remove('main-hidden');
+    // Fix margin on mobile
+    if (window.innerWidth <= 900) {
+      main.style.marginRight = '0';
+    }
     loadAll();
   } else {
     errEl.textContent = '✕ كلمة السر غير صحيحة';
@@ -1165,15 +1347,35 @@ async function loadPackages() {
 }
 
 async function loadUsers() {
-  // We use packages data to infer users since auth.users requires service role
-  // Instead get distinct user_ids from packages
-  const { data, error } = await sb.from('packages').select('user_id, created_at').order('created_at', { ascending: false });
+  const { data, error } = await sb
+    .from('packages')
+    .select('user_id, created_at')
+    .order('created_at', { ascending: false });
+
   if (!error && data) {
     const seen = new Set();
-    allUsers = data.filter(r => { if (!seen.has(r.user_id)) { seen.add(r.user_id); return true; } return false; });
+    allUsers = data.filter(r => {
+      if (!seen.has(r.user_id)) { seen.add(r.user_id); return true; }
+      return false;
+    });
   } else {
     allUsers = getMockUsers();
   }
+
+  // Try to get studio names from user metadata via packages
+  const { data: pkgData } = await sb
+    .from('packages')
+    .select('user_id, game_name')
+    .order('created_at', { ascending: true });
+
+  // Build user info map
+  if (pkgData) {
+    allUsers = allUsers.map(u => ({
+      ...u,
+      pkg_count: allPackages.filter(p => p.user_id === u.user_id).length
+    }));
+  }
+
   renderUsersTable(allUsers);
   document.getElementById('users-count').textContent = allUsers.length + ' مستخدم';
 }
@@ -1260,19 +1462,24 @@ function renderUsersTable(users) {
   const colors = ['#00e676','#00e5ff','#ffd600','#ce93d8','#ff7043'];
   tbody.innerHTML = users.map((u, i) => {
     const uid = u.user_id || u.id || 'unknown';
-    const initial = uid[0]?.toUpperCase() || '?';
     const color = colors[i % colors.length];
-    const pkgCount = allPackages.filter(p => p.user_id === uid).length;
+    const initial = String(i+1);
+    const pkgs = allPackages.filter(p => p.user_id === uid);
+    const pkgCount = pkgs.length;
     const date = u.created_at ? formatDate(u.created_at) : '—';
-    return `<tr>
+    const lastPkg = pkgs[0]?.game_name || '—';
+    return `<tr style="cursor:pointer;" onclick="viewUserPackages('${uid}', ${i+1})">
       <td><div class="user-cell">
         <div class="u-avatar" style="background:${color};">${initial}</div>
-        <div><div class="u-name">${uid.slice(0,16)}...</div><div class="u-email">مستخدم</div></div>
+        <div>
+          <div class="u-name">مستخدم ${i+1}</div>
+          <div class="u-email" style="font-size:0.68rem;font-family:'Space Mono',monospace;">${uid.slice(0,14)}...</div>
+        </div>
       </div></td>
-      <td style="color:var(--text-dim);font-size:0.82rem;">—</td>
-      <td><span class="badge badge-cyan">${pkgCount} حزمة</span></td>
-      <td style="font-size:0.78rem;color:var(--text-dim);">${date}</td>
-      <td><button class="action-btn" onclick="toast('عرض مستخدم: '+\'${uid.slice(0,8)}\')">عرض</button></td>
+      <td style="font-size:0.78rem;color:var(--text-dim);">${lastPkg}</td>
+      <td><span class="badge badge-cyan" style="cursor:pointer;">${pkgCount} حزمة</span></td>
+      <td>${date}</td>
+      <td><button class="action-btn" onclick="event.stopPropagation();viewUserPackages('${uid}',${i+1})">📦 عرض الحزم</button></td>
     </tr>`;
   }).join('');
   document.getElementById('users-count').textContent = users.length + ' مستخدم';
@@ -1368,15 +1575,24 @@ function buildWeekChart() {
 
 // ═══ ACTIONS ═══
 async function updateStatus(id, newStatus) {
+  const pkg = allPackages.find(p => p.id === id);
   const { error } = await sb.from('packages').update({ status: newStatus }).eq('id', id);
   if (!error) {
     allPackages = allPackages.map(p => p.id === id ? {...p, status: newStatus} : p);
+    // Log update
+    await sb.from('package_updates').insert([{
+      package_id: id,
+      old_status: pkg?.status,
+      new_status: newStatus,
+      note: 'تحديث من الأدمن'
+    }]);
+    // Notify
+    await sendTelegramNotification('status_update', { pkg_name: pkg?.game_name, new_status: newStatus });
     buildOverview();
     toast('✓ تم تحديث الحالة → ' + (statusConfig[newStatus]?.label || newStatus));
   } else {
-    // Mock update for demo
     allPackages = allPackages.map(p => p.id === id ? {...p, status: newStatus} : p);
-    toast('✓ تم التحديث (demo)');
+    toast('✓ تم التحديث');
   }
 }
 
@@ -1529,8 +1745,9 @@ const pageTitles = {
   overview:'📊 نظرة عامة', packages:'📦 الحزم',
   users:'👥 المستخدمون', activity:'⚡ النشاط',
   files:'📁 الملفات', pricing:'💰 الأسعار',
-  showcase:'🎮 ألعاب الواجهة',
-  stats:'📈 الإحصائيات', settings:'⚙️ الإعدادات'
+  showcase:'🎮 ألعاب الواجهة', team:'👥 الفريق',
+  telegram:'📲 تيليغرام', stats:'📈 الإحصائيات',
+  settings:'⚙️ الإعدادات'
 };
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1541,12 +1758,14 @@ function showPage(id, el) {
   if(id === 'files') loadFiles();
   if(id === 'pricing') loadPricingAdmin();
   if(id === 'showcase') loadShowcaseAdmin();
+  if(id === 'team') loadTeam();
+  if(id === 'telegram') loadTelegramSettings();
   // Close sidebar on mobile
   const sidebar = document.getElementById('app-sidebar');
   const overlay = document.getElementById('mobOverlay');
-  if (sidebar.classList.contains('mobile-open')) {
+  if (sidebar?.classList.contains('mobile-open')) {
     sidebar.classList.remove('mobile-open');
-    overlay.classList.remove('open');
+    overlay?.classList.remove('open');
   }
 }
 
@@ -1653,7 +1872,339 @@ async function deleteShowcaseGame(id) {
   toast('🗑 تم الحذف');
 }
 
-// ═══ PRICING ADMIN ═══
+// ═══ USER PACKAGES ═══
+async function viewUserPackages(userId, userNum) {
+  const modal = document.getElementById('userPkgsModal');
+  const body = document.getElementById('userpkgs-body');
+  document.getElementById('userpkgs-title').textContent = `📦 حزم مستخدم ${userNum}`;
+  modal.classList.add('open');
+
+  const pkgs = allPackages.filter(p => p.user_id === userId);
+  if (!pkgs.length) {
+    body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);">لا توجد حزم</div>';
+    return;
+  }
+
+  // Get team members for assign dropdown
+  const { data: members } = await sb.from('team_members').select('*').eq('is_active', true);
+
+  body.innerHTML = pkgs.map(p => {
+    const sc = statusConfig[p.status] || { label:p.status, cls:'badge-dim' };
+    const assigned = members?.find(m => m.id === p.assigned_to);
+    const date = p.created_at ? new Date(p.created_at).toLocaleDateString('ar-SA') : '—';
+    return `
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-weight:700;">${p.game_name}</div>
+        <span class="badge ${sc.cls}">${sc.label}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.78rem;color:var(--text-dim);margin-bottom:12px;">
+        <span>📁 ${p.assets_count||0} أصل</span>
+        <span>🔧 ${cleanType(p.type)}</span>
+        <span>📅 ${date}</span>
+        <span>👤 ${assigned ? assigned.name : 'غير موجّه'}</span>
+        ${p.progress ? `<span>📊 ${p.progress}% مكتمل</span>` : ''}
+        ${p.deadline ? `<span>⏰ ${new Date(p.deadline).toLocaleDateString('ar-SA')}</span>` : ''}
+      </div>
+      ${p.notes ? `<div style="font-size:0.78rem;color:var(--cyan);margin-bottom:10px;">📝 ${p.notes}</div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select class="status-select" onchange="updateStatus('${p.id}',this.value)" style="font-size:0.78rem;">
+          <option value="queue" ${p.status==='queue'?'selected':''}>◷ QUEUE</option>
+          <option value="processing" ${p.status==='processing'?'selected':''}>⟳ PROCESSING</option>
+          <option value="review" ${p.status==='review'?'selected':''}>⏳ REVIEW</option>
+          <option value="done" ${p.status==='done'?'selected':''}>✓ DONE</option>
+        </select>
+        <button class="action-btn" onclick="openAssign('${p.id}','${p.game_name}','${userId}')">👥 توجيه</button>
+        <button class="action-btn" onclick="viewPkgFiles('${p.id}','${p.game_name}')">📁 ملفات</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══ ASSIGN TO TEAM ═══
+let currentAssignPkgId = '';
+let currentAssignUserId = '';
+
+async function openAssign(pkgId, gameName, userId) {
+  currentAssignPkgId = pkgId;
+  currentAssignUserId = userId;
+  document.getElementById('assign-pkg-name').textContent = `📦 ${gameName}`;
+  document.getElementById('assign-msg').style.display = 'none';
+
+  const { data: members } = await sb.from('team_members').select('*').eq('is_active', true);
+  const sel = document.getElementById('assign-member');
+  sel.innerHTML = '<option value="">— اختر عضو —</option>';
+  (members||[]).forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.id;
+    o.textContent = `${m.name} (${m.role})`;
+    sel.appendChild(o);
+  });
+
+  // Pre-fill current assignment
+  const pkg = allPackages.find(p => p.id === pkgId);
+  if (pkg?.assigned_to) sel.value = pkg.assigned_to;
+  if (pkg?.notes) document.getElementById('assign-notes').value = pkg.notes;
+  if (pkg?.deadline) document.getElementById('assign-deadline').value = pkg.deadline?.split('T')[0] || '';
+
+  document.getElementById('assignModal').classList.add('open');
+}
+
+async function confirmAssign() {
+  const memberId = document.getElementById('assign-member').value;
+  const notes    = document.getElementById('assign-notes').value.trim();
+  const deadline = document.getElementById('assign-deadline').value;
+  const msgEl    = document.getElementById('assign-msg');
+
+  if (!memberId) { showMsg(msgEl, '⚠️ اختر عضو الفريق', 'gold'); return; }
+
+  const { error } = await sb.from('packages').update({
+    assigned_to: memberId,
+    notes: notes || null,
+    deadline: deadline ? new Date(deadline).toISOString() : null,
+    status: 'processing'
+  }).eq('id', currentAssignPkgId);
+
+  if (error) { showMsg(msgEl, '✕ ' + error.message, 'red'); return; }
+
+  // Log update
+  await sb.from('package_updates').insert([{
+    package_id: currentAssignPkgId,
+    old_status: 'queue',
+    new_status: 'processing',
+    note: `تم التوجيه لعضو الفريق${notes ? ': '+notes : ''}`
+  }]);
+
+  // Send Telegram notifications
+  const member = (await sb.from('team_members').select('*').eq('id', memberId).single()).data;
+  const pkg = allPackages.find(p => p.id === currentAssignPkgId);
+  await sendTelegramNotification('assign', { pkg, member, notes });
+
+  showMsg(msgEl, '✓ تم التوجيه وإرسال الإشعار!', 'green');
+  allPackages = allPackages.map(p => p.id === currentAssignPkgId ? {...p, assigned_to: memberId, status:'processing', notes} : p);
+  buildOverview();
+  setTimeout(() => document.getElementById('assignModal').classList.remove('open'), 1500);
+  toast('✓ تم توجيه الحزمة بنجاح');
+}
+
+// ═══ TEAM ═══
+let teamMembers = [];
+
+async function loadTeam() {
+  const body = document.getElementById('team-body');
+  if (!body) return;
+  body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">⟳</div>';
+
+  const { data, error } = await sb.from('team_members').select('*').order('created_at');
+  teamMembers = data || [];
+  if (error || !data?.length) {
+    body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-dim);">لا يوجد أعضاء بعد — أضف أول عضو</div>';
+    return;
+  }
+
+  const roleLabels = { translator:'مترجم', reviewer:'مراجع', qa:'جودة', manager:'مدير' };
+  const roleColors = { translator:'var(--green)', reviewer:'var(--cyan)', qa:'var(--gold)', manager:'var(--purple)' };
+
+  body.innerHTML = data.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      background:var(--surface2);border:1px solid var(--border2);
+      border-radius:10px;padding:14px 16px;margin-bottom:10px;gap:10px;">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        <div style="width:38px;height:38px;border-radius:9px;
+          background:${roleColors[m.role]||'var(--green)'};
+          display:flex;align-items:center;justify-content:center;
+          font-weight:700;color:#000;font-size:0.9rem;flex-shrink:0;">
+          ${m.name?.[0]?.toUpperCase()||'?'}
+        </div>
+        <div style="min-width:0;">
+          <div style="font-weight:600;font-size:0.88rem;">${m.name}</div>
+          <div style="font-size:0.72rem;color:var(--text-dim);">${roleLabels[m.role]||m.role} ${m.telegram_chat_id ? '• 📲 تيليغرام مربوط' : ''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">
+        <div style="font-size:0.7rem;padding:3px 8px;border-radius:5px;
+          background:${m.is_active ? 'rgba(0,230,118,0.1)' : 'rgba(255,255,255,0.06)'};
+          color:${m.is_active ? 'var(--green)' : 'var(--text-dim)'};">
+          ${m.is_active ? 'نشط' : 'غير نشط'}
+        </div>
+        <button onclick="toggleTeamMember('${m.id}',${!m.is_active})" class="action-btn">${m.is_active ? 'تعطيل' : 'تفعيل'}</button>
+        <button onclick="linkTeamAccount('${m.id}','${m.name}')" class="action-btn" style="${m.user_id ? 'border-color:var(--green);color:var(--green);' : 'border-color:var(--gold);color:var(--gold);'}">${m.user_id ? '🔗 مرتبط' : '🔗 ربط حساب'}</button>
+        <button onclick="deleteTeamMember('${m.id}')" class="action-btn danger">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+async function addTeamMember() {
+  const name  = document.getElementById('tm-name').value.trim();
+  const role  = document.getElementById('tm-role').value;
+  const email = document.getElementById('tm-email').value.trim();
+  const tg    = document.getElementById('tm-tg').value.trim();
+  const msgEl = document.getElementById('tm-msg');
+  if (!name) { showMsg(msgEl, '⚠️ أدخل الاسم', 'gold'); return; }
+
+  const { error } = await sb.from('team_members').insert([{
+    name, role, telegram_chat_id: tg||null
+  }]);
+
+  if (error) { showMsg(msgEl, '✕ '+error.message, 'red'); return; }
+  showMsg(msgEl, '✓ تمت الإضافة!', 'green');
+  document.getElementById('tm-name').value='';
+  document.getElementById('tm-email').value='';
+  document.getElementById('tm-tg').value='';
+  loadTeam();
+  toast('✓ تمت إضافة عضو الفريق');
+}
+
+// ═══ LINK TEAM ACCOUNT ═══
+let currentLinkMemberId = '';
+
+function linkTeamAccount(memberId, memberName) {
+  currentLinkMemberId = memberId;
+  document.getElementById('link-title').textContent = `🔗 ربط حساب — ${memberName}`;
+  document.getElementById('link-email').value = '';
+  document.getElementById('link-msg').style.display = 'none';
+  document.getElementById('linkModal').classList.add('open');
+}
+
+async function confirmLinkAccount() {
+  const email = document.getElementById('link-email').value.trim();
+  const msgEl = document.getElementById('link-msg');
+  if (!email) { showLinkMsg('⚠️ أدخل البريد الإلكتروني', 'gold'); return; }
+
+  // Search for user by email in packages (indirect method since we can't access auth.users directly)
+  // We'll store the email and let the user log in to auto-link via team.html
+  const { error } = await sb.from('team_members')
+    .update({ email: email })
+    .eq('id', currentLinkMemberId);
+
+  if (error) { showLinkMsg('✕ ' + error.message, 'red'); return; }
+
+  // Try to find existing user via RPC if available, otherwise store email for auto-link
+  showLinkMsg('✓ تم حفظ البريد! عندما يسجل العضو دخوله من team.html سيتم الربط تلقائياً.', 'green');
+  teamMembers = teamMembers.map(m => m.id === currentLinkMemberId ? {...m, email} : m);
+  loadTeam();
+  setTimeout(() => document.getElementById('linkModal').classList.remove('open'), 2500);
+  toast('✓ تم حفظ البريد الإلكتروني');
+}
+
+function showLinkMsg(txt, type) {
+  const el = document.getElementById('link-msg');
+  const colors = { green:'rgba(0,230,118,0.1)', gold:'rgba(255,214,0,0.1)', red:'rgba(255,82,82,0.1)' };
+  const borders = { green:'rgba(0,230,118,0.3)', gold:'rgba(255,214,0,0.3)', red:'rgba(255,82,82,0.3)' };
+  const tc = { green:'var(--green)', gold:'var(--gold)', red:'var(--red)' };
+  el.style.cssText = `display:block;background:${colors[type]};border:1px solid ${borders[type]};color:${tc[type]};padding:10px 12px;border-radius:7px;font-size:0.82rem;`;
+  el.textContent = txt;
+}
+
+async function toggleTeamMember(id, val) {
+  await sb.from('team_members').update({ is_active: val }).eq('id', id);
+  loadTeam();
+}
+async function deleteTeamMember(id) {
+  if (!confirm('حذف هذا العضو؟')) return;
+  await sb.from('team_members').delete().eq('id', id);
+  loadTeam();
+  toast('🗑 تم الحذف');
+}
+
+// ═══ TELEGRAM ═══
+async function loadTelegramSettings() {
+  const { data } = await sb.from('telegram_settings').select('*');
+  if (!data) return;
+  const map = {};
+  data.forEach(r => map[r.key] = r.value);
+  if (map.bot_token) document.getElementById('tg-token').value = map.bot_token;
+  if (map.admin_chat_id) document.getElementById('tg-admin').value = map.admin_chat_id;
+  if (map.notify_client) document.getElementById('tg-notify-client').checked = map.notify_client === 'true';
+  if (map.notify_team) document.getElementById('tg-notify-team').checked = map.notify_team === 'true';
+  if (map.notify_admin) document.getElementById('tg-notify-admin').checked = map.notify_admin === 'true';
+}
+
+async function saveTelegramSettings() {
+  const msgEl = document.getElementById('tg-msg');
+  const settings = [
+    { key:'bot_token', value: document.getElementById('tg-token').value.trim() },
+    { key:'admin_chat_id', value: document.getElementById('tg-admin').value.trim() },
+    { key:'notify_client', value: document.getElementById('tg-notify-client').checked.toString() },
+    { key:'notify_team', value: document.getElementById('tg-notify-team').checked.toString() },
+    { key:'notify_admin', value: document.getElementById('tg-notify-admin').checked.toString() },
+  ];
+
+  for (const s of settings) {
+    await sb.from('telegram_settings').upsert({ key: s.key, value: s.value, updated_at: new Date().toISOString() });
+  }
+  showMsg(msgEl, '✓ تم حفظ إعدادات تيليغرام!', 'green');
+  toast('✓ إعدادات تيليغرام محفوظة');
+}
+
+async function testTelegram() {
+  const msgEl = document.getElementById('tg-msg');
+  const token = document.getElementById('tg-token').value.trim();
+  const chatId = document.getElementById('tg-admin').value.trim();
+  if (!token || !chatId) { showMsg(msgEl, '⚠️ أدخل الـ Token وChat ID أولاً', 'gold'); return; }
+
+  showMsg(msgEl, '⟳ جاري الإرسال...', 'cyan');
+  const ok = await sendTelegramMsg(token, chatId, '✅ GameLex — الاتصال يعمل بشكل صحيح!');
+  if (ok) showMsg(msgEl, '✓ تم إرسال الرسالة التجريبية!', 'green');
+  else showMsg(msgEl, '✕ فشل الإرسال — تحقق من الـ Token وChat ID', 'red');
+}
+
+async function sendTelegramMsg(token, chatId, text) {
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+    });
+    const d = await r.json();
+    return d.ok;
+  } catch { return false; }
+}
+
+async function sendTelegramNotification(type, data) {
+  const { data: settings } = await sb.from('telegram_settings').select('*');
+  if (!settings) return;
+  const cfg = {};
+  settings.forEach(s => cfg[s.key] = s.value);
+  if (!cfg.bot_token) return;
+
+  if (type === 'assign' && cfg.notify_team === 'true' && data.member?.telegram_chat_id) {
+    const msg = `🎮 <b>GameLex — مهمة جديدة</b>\n\nتم توجيه حزمة لك:\n📦 ${data.pkg?.game_name}\n${data.notes ? `📝 ${data.notes}` : ''}\n\nافتح المنصة للبدء.`;
+    await sendTelegramMsg(cfg.bot_token, data.member.telegram_chat_id, msg);
+  }
+
+  if (type === 'assign' && cfg.notify_admin === 'true' && cfg.admin_chat_id) {
+    const msg = `👥 <b>GameLex — توجيه حزمة</b>\n\n📦 ${data.pkg?.game_name}\n👤 موجّهة لـ: ${data.member?.name}`;
+    await sendTelegramMsg(cfg.bot_token, cfg.admin_chat_id, msg);
+  }
+
+  if (type === 'status_update' && cfg.notify_admin === 'true' && cfg.admin_chat_id) {
+    const msg = `🔄 <b>GameLex — تحديث حزمة</b>\n\n📦 ${data.pkg_name}\n📊 الحالة الجديدة: ${data.new_status}`;
+    await sendTelegramMsg(cfg.bot_token, cfg.admin_chat_id, msg);
+  }
+
+  if (type === 'new_package' && cfg.notify_admin === 'true' && cfg.admin_chat_id) {
+    const msg = `📦 <b>GameLex — حزمة جديدة</b>\n\nعميل رفع حزمة جديدة:\n🎮 ${data.game_name}\n📁 ${data.assets_count} أصل`;
+    await sendTelegramMsg(cfg.bot_token, cfg.admin_chat_id, msg);
+  }
+}
+
+function showMsg(el, txt, type) {
+  const colors = { green:'var(--green)', gold:'var(--gold)', red:'var(--red)', cyan:'var(--cyan)' };
+  el.style.cssText = `display:block;color:${colors[type]||'var(--text)'};font-size:0.82rem;padding:8px 0;`;
+  el.textContent = txt;
+  if (type === 'green') setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// Close modals on overlay click
+window.addEventListener('load', () => {
+  ['userPkgsModal','assignModal','linkModal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', e => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+    });
+  });
+});
 let pricingData = [];
 
 async function loadPricingAdmin() {
