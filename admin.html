@@ -635,6 +635,9 @@ body {
     <div class="nav-item" onclick="showPage('activity',this)">
       <span class="nav-icon">⚡</span> <span data-i18n="ov_activity">النشاط</span>
     </div>
+    <div class="nav-item" onclick="showPage('files',this)">
+      <span class="nav-icon">📁</span> <span>الملفات</span>
+    </div>
   </div>
 
   <div class="sidebar-section">
@@ -806,7 +809,36 @@ body {
       </div>
     </div>
 
-    <!-- ═══ ACTIVITY PAGE ═══ -->
+    <!-- ═══ FILES PAGE ═══ -->
+    <div class="page" id="page-files">
+      <div class="search-bar">
+        <span style="color:var(--text-dim);">🔍</span>
+        <input type="text" placeholder="ابحث عن ملف..." id="file-search" oninput="filterFiles()">
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📁 ملفات العملاء</div>
+          <span style="font-size:0.75rem;color:var(--text-dim);font-family:'Space Mono',monospace;" id="files-count">—</span>
+        </div>
+        <div class="card-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>الملف</th>
+                <th>العميل</th>
+                <th>الحزمة</th>
+                <th>الحجم</th>
+                <th>التاريخ</th>
+                <th>تحميل</th>
+              </tr>
+            </thead>
+            <tbody id="files-body">
+              <tr class="loading-row"><td colspan="6">⟳ جاري التحميل...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
     <div class="page" id="page-activity">
       <div class="card">
         <div class="card-header">
@@ -1235,11 +1267,119 @@ function filterUsers() {
   renderUsersTable(allUsers.filter(u => (u.user_id||'').toLowerCase().includes(q)));
 }
 
+// ═══ FILES ═══
+let allFiles = [];
+
+async function loadFiles() {
+  const tbody = document.getElementById('files-body');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="6">⟳ جاري التحميل...</td></tr>';
+
+  const { data, error } = await sb.storage.from('packages').list('', {
+    limit: 200, sortBy: { column: 'created_at', order: 'desc' }
+  });
+
+  if (error || !data) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="6">✕ خطأ في تحميل الملفات</td></tr>';
+    return;
+  }
+
+  // List is flat folders (user_id) — need to recurse
+  allFiles = [];
+  for (const folder of data) {
+    if (folder.id) continue; // it's a file not a folder
+    // Get packages inside user folder
+    const { data: pkgFolders } = await sb.storage.from('packages').list(folder.name);
+    if (!pkgFolders) continue;
+    for (const pkgFolder of pkgFolders) {
+      if (pkgFolder.id) continue;
+      const { data: files } = await sb.storage.from('packages').list(`${folder.name}/${pkgFolder.name}`);
+      if (!files) continue;
+      for (const file of files) {
+        if (!file.id) continue;
+        allFiles.push({
+          name: file.name,
+          path: `${folder.name}/${pkgFolder.name}/${file.name}`,
+          user_id: folder.name,
+          pkg_id: pkgFolder.name,
+          size: file.metadata?.size || 0,
+          created_at: file.created_at || file.metadata?.lastModified
+        });
+      }
+    }
+  }
+
+  renderFilesTable(allFiles);
+  document.getElementById('files-count').textContent = allFiles.length + ' ملف';
+}
+
+function renderFilesTable(files) {
+  const tbody = document.getElementById('files-body');
+  if (!files.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="6"><div class="empty-state"><div class="empty-icon">📁</div><p>لا توجد ملفات بعد</p></div></td></tr>';
+    return;
+  }
+
+  const fileIcons = { png:'🖼️', jpg:'🖼️', jpeg:'🖼️', mp3:'🎵', wav:'🎵', json:'📋', csv:'📊', po:'📝', xliff:'📝', zip:'📦', pdf:'📄', txt:'📄' };
+
+  tbody.innerHTML = files.map(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    const icon = fileIcons[ext] || '📄';
+    const size = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : f.size > 1024 ? (f.size/1024).toFixed(0)+' KB' : f.size+' B';
+    const date = f.created_at ? new Date(f.created_at).toLocaleDateString('ar-SA') : '—';
+    const shortUser = f.user_id.slice(0,8)+'...';
+    const shortPkg  = f.pkg_id.slice(0,8)+'...';
+
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;">
+        <span>${icon}</span>
+        <div>
+          <div style="font-weight:600;font-size:0.82rem;">${f.name}</div>
+          <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;">.${ext}</div>
+        </div>
+      </div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--text-dim);">${shortUser}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--text-dim);">${shortPkg}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.78rem;">${size}</td>
+      <td style="font-size:0.78rem;color:var(--text-dim);">${date}</td>
+      <td>
+        <button class="action-btn" onclick="downloadFile('${f.path}','${f.name}')">⬇️ تحميل</button>
+        <button class="action-btn danger" onclick="deleteFile('${f.path}')">حذف</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterFiles() {
+  const q = document.getElementById('file-search').value.toLowerCase();
+  renderFilesTable(allFiles.filter(f => f.name.toLowerCase().includes(q)));
+}
+
+async function downloadFile(path, name) {
+  const { data, error } = await sb.storage.from('packages').download(path);
+  if (error) { toast('✕ خطأ في التحميل'); return; }
+  const url = URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+  toast('✓ جاري التحميل: ' + name);
+}
+
+async function deleteFile(path) {
+  if (!confirm('حذف هذا الملف؟')) return;
+  const { error } = await sb.storage.from('packages').remove([path]);
+  if (error) { toast('✕ خطأ في الحذف'); return; }
+  allFiles = allFiles.filter(f => f.path !== path);
+  renderFilesTable(allFiles);
+  document.getElementById('files-count').textContent = allFiles.length + ' ملف';
+  toast('🗑 تم الحذف');
+}
+
 // ═══ NAV ═══
 const pageTitles = {
   overview:'📊 نظرة عامة', packages:'📦 الحزم',
   users:'👥 المستخدمون', activity:'⚡ النشاط',
-  stats:'📈 الإحصائيات', settings:'⚙️ الإعدادات'
+  files:'📁 الملفات', stats:'📈 الإحصائيات', settings:'⚙️ الإعدادات'
 };
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1247,9 +1387,15 @@ function showPage(id, el) {
   document.getElementById('page-'+id).classList.add('active');
   if(el) el.classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[id] || id;
+  if(id === 'files') loadFiles();
 }
 
-function refreshData() { loadAll(); toast('↻ تم تحديث البيانات'); }
+function refreshData() {
+  loadAll();
+  const activePage = document.querySelector('.page.active')?.id?.replace('page-','');
+  if(activePage === 'files') loadFiles();
+  toast('↻ تم تحديث البيانات');
+}
 
 // ═══ HELPERS ═══
 function timeAgo(iso) {
