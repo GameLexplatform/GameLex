@@ -1361,8 +1361,8 @@ function renderFilesTable(files) {
           <div style="font-size:0.68rem;color:var(--text-dim);font-family:'Space Mono',monospace;">.${ext}</div>
         </div>
       </div></td>
-      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--text-dim);">${shortUser}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--text-dim);">${shortPkg}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--text-dim);">${f.user_id.slice(0,8)}...</td>
+      <td style="font-size:0.78rem;">${f.game_name || f.pkg_id.slice(0,12)+'...'}</td>
       <td style="font-family:'Space Mono',monospace;font-size:0.78rem;">${size}</td>
       <td style="font-size:0.78rem;color:var(--text-dim);">${date}</td>
       <td>
