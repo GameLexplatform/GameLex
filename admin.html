@@ -567,22 +567,20 @@ body {
 /* Loading */
 .loading-row td { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding: 40px !important; }
 
-/* Tablet */
-@media(max-width:1024px){
-  :root { --sidebar-w: 200px; }
-  .content { padding:24px; }
-  .stats-row { grid-template-columns:repeat(2,1fr); gap:14px; }
-  .grid-2, .grid-3 { grid-template-columns:1fr; }
-}
-/* Mobile */
 @media(max-width:900px){
-  .sidebar { display:none; }
-  .sidebar.mobile-open {
-    display:flex !important; z-index:100;
-    position:fixed; top:0; right:0; bottom:0;
-    box-shadow:-4px 0 24px rgba(0,0,0,0.5);
+  /* Sidebar always hidden on mobile - only shows via hamburger */
+  #app-sidebar {
+    display: none !important;
   }
-  .main { margin-right:0; }
+  #app-sidebar.mobile-open {
+    display: flex !important;
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    z-index: 400;
+    width: 260px;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.6);
+  }
+  .main { margin-right: 0 !important; }
   .stats-row { grid-template-columns:repeat(2,1fr); gap:12px; }
   .grid-2, .grid-3 { grid-template-columns:1fr; }
   .content { padding:16px; }
@@ -600,7 +598,6 @@ body {
   #gl-lang-picker { display:none; }
   .refresh-btn { padding:5px 10px; font-size:0.75rem; }
 }
-/* Small mobile */
 @media(max-width:480px){
   .stats-row { grid-template-columns:1fr 1fr; gap:10px; }
   .stat-card { padding:12px; }
@@ -616,7 +613,7 @@ body {
 <style>
 .mob-overlay {
   display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.6); z-index:199;
+  background:rgba(0,0,0,0.6); z-index:299;
 }
 .mob-overlay.open { display:block; }
 .mob-menu-btn {
@@ -1059,9 +1056,11 @@ function checkSecret() {
   const errEl = document.getElementById('secret-err');
   if (val === adminSecret) {
     sessionStorage.setItem('gl_secret', '1');
-    // Hide auth, show app
     document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('app-sidebar').classList.remove('sidebar-hidden');
+    // Only show sidebar on desktop
+    if (window.innerWidth > 900) {
+      document.getElementById('app-sidebar').classList.remove('sidebar-hidden');
+    }
     document.getElementById('app-main').classList.remove('main-hidden');
     loadAll();
   } else {
@@ -1131,7 +1130,9 @@ async function doLogout() {
   sessionStorage.removeItem('gl_secret');
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('app-sidebar').classList.add('sidebar-hidden');
+  document.getElementById('app-sidebar').classList.remove('mobile-open');
   document.getElementById('app-main').classList.add('main-hidden');
+  document.getElementById('mobOverlay').classList.remove('open');
   document.getElementById('secret-input').value = '';
 }
 
@@ -1540,6 +1541,13 @@ function showPage(id, el) {
   if(id === 'files') loadFiles();
   if(id === 'pricing') loadPricingAdmin();
   if(id === 'showcase') loadShowcaseAdmin();
+  // Close sidebar on mobile
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('mobOverlay');
+  if (sidebar.classList.contains('mobile-open')) {
+    sidebar.classList.remove('mobile-open');
+    overlay.classList.remove('open');
+  }
 }
 
 function refreshData() {
