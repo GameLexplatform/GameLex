@@ -937,19 +937,6 @@ body {
   </div><!-- end content -->
 </div><!-- end main -->
 
-<!-- ═══ PKG FILES MODAL ═══ -->
-<div class="modal-overlay" id="pkgFilesModal" style="z-index:150;">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:0;width:560px;max-width:96vw;max-height:85vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,0.5);">
-    <div style="padding:20px 24px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;">
-      <div style="font-weight:700;font-size:1rem;" id="pkgfiles-title">📁 ملفات الحزمة</div>
-      <button onclick="document.getElementById('pkgFilesModal').classList.remove('open')" style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✕</button>
-    </div>
-    <div style="padding:20px;" id="pkgfiles-body">
-      <div style="text-align:center;padding:30px;color:var(--text-dim);">⟳ جاري التحميل...</div>
-    </div>
-  </div>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -1148,7 +1135,7 @@ function pkgRow(pkg, cols) {
   if (cols.includes('assets'))html += `<td style="font-family:'Space Mono',monospace;">${pkg.assets_count||'—'}</td>`;
   if (cols.includes('status'))html += `<td><select class="status-select" onchange="updateStatus('${pkg.id}',this.value)"><option value="queue" ${pkg.status==='queue'?'selected':''}>◷ QUEUE</option><option value="processing" ${pkg.status==='processing'?'selected':''}>⟳ PROCESSING</option><option value="review" ${pkg.status==='review'?'selected':''}>⏳ REVIEW</option><option value="done" ${pkg.status==='done'?'selected':''}>✓ DONE</option></select></td>`;
   if (cols.includes('date'))  html += `<td>${date}</td>`;
-  if (cols.includes('actions'))html += `<td><button class="action-btn" onclick="viewPkgFiles('${pkg.id}','${pkg.game_name}')">📁 ملفات</button><button class="action-btn danger" onclick="deletePkg('${pkg.id}')">حذف</button></td>`;
+  if (cols.includes('actions'))html += `<td><button class="action-btn" onclick="viewPkg('${pkg.id}')">عرض</button><button class="action-btn danger" onclick="deletePkg('${pkg.id}')">حذف</button></td>`;
   html += `</tr>`;
   return html;
 }
@@ -1303,63 +1290,9 @@ async function deletePkg(id) {
   toast('🗑 تم الحذف');
 }
 
-async function viewPkgFiles(pkgId, gameName) {
-  const modal = document.getElementById('pkgFilesModal');
-  const body = document.getElementById('pkgfiles-body');
-  const title = document.getElementById('pkgfiles-title');
-  title.textContent = `📁 ${gameName}`;
-  body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);">⟳ جاري التحميل...</div>';
-  modal.classList.add('open');
-
-  // Find user_id for this package
-  const pkg = allPackages.find(p => p.id === pkgId);
-  if (!pkg) { body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--red);">✕ ما وجدنا الحزمة</div>'; return; }
-
-  const folderPath = `${pkg.user_id}/${pkgId}`;
-  const { data: files, error } = await sb.storage.from('packages').list(folderPath, { limit: 100 });
-
-  if (error || !files || files.length === 0) {
-    body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim);">
-      <div style="font-size:2rem;margin-bottom:12px;">📂</div>
-      <div>لا توجد ملفات مرفوعة لهذه الحزمة بعد</div>
-    </div>`;
-    return;
-  }
-
-  const fileIcons = { png:'🖼️', jpg:'🖼️', jpeg:'🖼️', mp3:'🎵', wav:'🎵', json:'📋', csv:'📊', po:'📝', xliff:'📝', zip:'📦', pdf:'📄', txt:'📄' };
-
-  body.innerHTML = `
-    <div style="font-size:0.72rem;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:14px;letter-spacing:1px;">${files.length} ملف</div>
-    ${files.filter(f => f.name !== '.emptyFolderPlaceholder').map(f => {
-      const ext = f.name.split('.').pop().toLowerCase();
-      const icon = fileIcons[ext] || '📄';
-      const size = f.metadata?.size > 1048576 ? (f.metadata.size/1048576).toFixed(1)+' MB'
-                 : f.metadata?.size > 1024 ? (f.metadata.size/1024).toFixed(0)+' KB'
-                 : (f.metadata?.size||0)+' B';
-      const path = `${folderPath}/${f.name}`;
-      return `<div style="display:flex;align-items:center;justify-content:space-between;
-        background:var(--surface2);border:1px solid var(--border2);
-        border-radius:10px;padding:12px 16px;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-          <span style="font-size:1.3rem;flex-shrink:0;">${icon}</span>
-          <div style="min-width:0;">
-            <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
-            <div style="font-size:0.7rem;color:var(--text-dim);">${size}</div>
-          </div>
-        </div>
-        <button onclick="downloadFile('${path}','${f.name}')"
-          style="background:var(--green);color:#000;border:none;padding:7px 14px;
-          border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;
-          white-space:nowrap;flex-shrink:0;margin-right:8px;font-family:'Tajawal',sans-serif;">
-          ⬇️ تحميل
-        </button>
-      </div>`;
-    }).join('')}`;
-}
-
 function viewPkg(id) {
   const pkg = allPackages.find(p => p.id === id);
-  if (pkg) viewPkgFiles(id, pkg.game_name);
+  if (pkg) toast(`📦 ${pkg.game_name} — ${pkg.assets_count} أصل`);
 }
 
 // ═══ SEARCH FILTERS ═══
@@ -1533,11 +1466,6 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
-
-// Close pkgFilesModal on overlay click
-document.getElementById('pkgFilesModal').addEventListener('click', e => {
-  if(e.target === e.currentTarget) e.currentTarget.classList.remove('open');
-});
 
 // Init i18n
 i18n.init('gl-lang-picker');
