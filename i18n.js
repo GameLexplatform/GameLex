@@ -159,6 +159,31 @@ class GameLexI18n {
       else el.innerHTML = val;
     });
 
+    // Handle old ar-text/en-text/ar-inline/en-inline system
+    const isAr = this.current === 'ar';
+    const isRtl = cfg.dir === 'rtl';
+
+    document.querySelectorAll('.ar-text').forEach(el => {
+      el.style.display = isAr ? 'block' : 'none';
+    });
+    document.querySelectorAll('.en-text').forEach(el => {
+      el.style.display = (!isAr && this.current === 'en') ? 'block' : 'none';
+    });
+    document.querySelectorAll('.ar-inline').forEach(el => {
+      el.style.display = isAr ? 'inline' : 'none';
+    });
+    document.querySelectorAll('.en-inline').forEach(el => {
+      el.style.display = (!isAr && this.current === 'en') ? 'inline' : 'none';
+    });
+
+    // For non-Arabic non-English: show English as fallback
+    if (this.current !== 'ar' && this.current !== 'en') {
+      document.querySelectorAll('.en-text').forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.en-inline').forEach(el => el.style.display = 'inline');
+      document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.ar-inline').forEach(el => el.style.display = 'none');
+    }
+
     // Update lang picker UI
     document.querySelectorAll('.gl-lang-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.lang === this.current);
