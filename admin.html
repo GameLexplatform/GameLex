@@ -35,6 +35,24 @@ body {
   display: flex;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 500;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
 /* ═══ SIDEBAR ═══ */
 .sidebar {
   width: var(--sidebar-w);
@@ -1505,13 +1523,26 @@ async function viewPkgFiles(pkgId, gameName) {
   body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-dim);">⟳ جاري التحميل...</div>';
   modal.classList.add('open');
 
-  const pkg = allPackages.find(p => p.id === pkgId);
-  if (!pkg) { body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--red);">✕ ما وجدنا الحزمة</div>'; return; }
+  // Get user_id from DB directly to make sure it's correct
+  const { data: pkgData } = await sb.from('packages').select('user_id').eq('id', pkgId).single();
+  const userId = pkgData?.user_id;
 
-  const folderPath = `${pkg.user_id}/${pkgId}`;
+  if (!userId) {
+    body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--red);">✕ ما وجدنا بيانات الحزمة</div>';
+    return;
+  }
+
+  const folderPath = `${userId}/${pkgId}`;
   const { data: files, error } = await sb.storage.from('packages').list(folderPath, { limit: 100 });
 
-  if (error || !files || files.filter(f=>f.id).length === 0) {
+  if (error) {
+    body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--red);">✕ خطأ: ${error.message}</div>`;
+    return;
+  }
+
+  const realFiles = (files || []).filter(f => f.name && f.name !== '.emptyFolderPlaceholder');
+
+  if (realFiles.length === 0) {
     body.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim);">
       <div style="font-size:2rem;margin-bottom:12px;">📂</div>
       <div>لا توجد ملفات لهذه الحزمة بعد</div>
@@ -1519,13 +1550,13 @@ async function viewPkgFiles(pkgId, gameName) {
     return;
   }
 
-  const fileIcons = { png:'🖼️', jpg:'🖼️', jpeg:'🖼️', mp3:'🎵', wav:'🎵', json:'📋', csv:'📊', po:'📝', xliff:'📝', zip:'📦', pdf:'📄', txt:'📄' };
+  const fileIcons = { png:'🖼️', jpg:'🖼️', jpeg:'🖼️', mp3:'🎵', wav:'🎵', json:'📋', csv:'📊', po:'📝', xliff:'📝', zip:'📦', pdf:'📄', txt:'📄', js:'📝' };
 
-  body.innerHTML = files.filter(f => f.name && f.name !== '.emptyFolderPlaceholder').map(f => {
+  body.innerHTML = realFiles.map(f => {
     const ext = f.name.split('.').pop().toLowerCase();
     const icon = fileIcons[ext] || '📄';
-    const sz = f.metadata?.size;
-    const size = sz > 1048576 ? (sz/1048576).toFixed(1)+' MB' : sz > 1024 ? Math.round(sz/1024)+' KB' : (sz||0)+' B';
+    const sz = f.metadata?.size || 0;
+    const size = sz > 1048576 ? (sz/1048576).toFixed(1)+' MB' : sz > 1024 ? Math.round(sz/1024)+' KB' : sz+' B';
     const path = `${folderPath}/${f.name}`;
     return `<div style="display:flex;align-items:center;justify-content:space-between;
       background:var(--surface2);border:1px solid var(--border2);
